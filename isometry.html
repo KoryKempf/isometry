@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Isometry — Reconstruct the Shadow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&family=Barlow:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0A0D;
+      --s1: #111116;
+      --s2: #18181F;
+      --s3: #222229;
+      --b1: rgba(255,255,255,.05);
+      --b2: rgba(255,255,255,.10);
+      --b3: rgba(255,255,255,.18);
+      --t1: #EEEEF2;
+      --t2: #9090A0;
+      --t3: #505060;
+      --cube-top: #9F7AEA;
+      --cube-left: #6B46C1;
+      --cube-right: #44337A;
+      --ok: #48BB78;
+      --warn: #ECC94B;
+      --err: #FC8181;
+      --accent: #805AD5;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--t1);
+      font-family: 'Barlow', system-ui, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ─────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 58px;
+      border-bottom: 1px solid var(--b1);
+      position: sticky;
+      top: 0;
+      background: rgba(10,10,13,.92);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+    .logo {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--t1);
+    }
+    .logo em { color: var(--cube-top); font-style: normal; }
+    .hstats { display: flex; gap: 28px; }
+    .hstat { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+    .hstat-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 17px;
+      color: var(--t1);
+      line-height: 1;
+    }
+    .hstat-lbl {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 9px;
+      color: var(--t3);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    /* ── Difficulty ──────────────────────────── */
+    .diff-bar {
+      display: flex;
+      gap: 4px;
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--b1);
+    }
+    .diff-btn {
+      flex: 1;
+      height: 32px;
+      border: 1px solid var(--b2);
+      background: transparent;
+      color: var(--t2);
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all .15s;
+      text-transform: uppercase;
+    }
+    .diff-btn:hover { color: var(--t1); border-color: var(--b3); }
+    .diff-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .diff-btn.expert-btn { border-color: rgba(252,129,129,.25); }
+    .diff-btn.expert-btn.active { background: #C53030; border-color: #C53030; }
+
+    /* ── Puzzle meta ─────────────────────────── */
+    .puzzle-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 24px 0;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .puzzle-name-el {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 12px;
+      color: var(--t2);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .daily-badge {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 10px;
+      color: var(--warn);
+      background: rgba(236,201,75,.08);
+      border: 1px solid rgba(236,201,75,.2);
+      border-radius: 20px;
+      padding: 2px 10px;
+      letter-spacing: .08em;
+      display: none;
+    }
+
+    /* ── Main layout ─────────────────────────── */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 12px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Panels ──────────────────────────────── */
+    .panel {
+      background: var(--s1);
+      border: 1px solid var(--b1);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .panel-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: var(--t3);
+      margin-bottom: 14px;
+    }
+
+    /* ── Shadow grids ─────────────────────────── */
+    .shadow-group { margin-bottom: 13px; }
+    .shadow-label {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 9px;
+      color: var(--t3);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .sgrid {
+      display: inline-grid;
+      gap: 2px;
+      background: var(--s2);
+      padding: 4px;
+      border-radius: 5px;
+    }
+    .sgrid.n3 { grid-template-columns: repeat(3, 22px); }
+    .sgrid.n4 { grid-template-columns: repeat(4, 17px); }
+    .sc { border-radius: 2px; }
+    .sgrid.n3 .sc { width: 22px; height: 22px; }
+    .sgrid.n4 .sc { width: 17px; height: 17px; }
+    .sc.on  { background: var(--accent); }
+    .sc.off { background: var(--s3); }
+    .sc.match   { background: var(--ok); opacity: .85; }
+    .sc.extra   { background: var(--err); opacity: .85; }
+    .sc.missing { background: var(--s3); outline: 1.5px solid var(--warn); outline-offset: -1px; }
+
+    /* ── Layer editor ─────────────────────────── */
+    .layer-tabs { display: flex; gap: 3px; margin-bottom: 10px; }
+    .layer-tab {
+      flex: 1;
+      height: 26px;
+      border: 1px solid var(--b2);
+      background: transparent;
+      color: var(--t2);
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .layer-tab:hover { color: var(--t1); }
+    .layer-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .lgrid-wrap { display: flex; justify-content: center; margin-bottom: 8px; }
+    .lgrid { display: inline-grid; gap: 5px; }
+    .lgrid.n3 { grid-template-columns: repeat(3, 60px); }
+    .lgrid.n4 { grid-template-columns: repeat(4, 44px); }
+    .lc {
+      aspect-ratio: 1;
+      border-radius: 5px;
+      border: 1px solid var(--b2);
+      background: var(--s2);
+      cursor: pointer;
+      transition: border-color .12s, background .12s, transform .08s;
+      position: relative;
+    }
+    .lc:hover { border-color: var(--cube-top); background: var(--s3); }
+    .lc:active { transform: scale(.94); }
+    .lc.on { background: var(--accent); border-color: var(--cube-top); }
+    .lc.on:hover { background: var(--cube-left); }
+    .lc.hint-cell {
+      border-color: var(--warn);
+      background: rgba(236,201,75,.12);
+      animation: hint-pulse .7s ease-in-out infinite alternate;
+    }
+    @keyframes hint-pulse { from { opacity: .55 } to { opacity: 1 } }
+    .orient-hint {
+      font-family: 'Barlow', sans-serif;
+      font-size: 10px;
+      color: var(--t3);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    /* ── Live shadows ─────────────────────────── */
+    .live-shadows {
+      border-top: 1px solid var(--b1);
+      padding-top: 10px;
+    }
+    .live-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 9px;
+      color: var(--t3);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .live-row { display: flex; gap: 6px; align-items: flex-start; }
+    .live-view { flex: 1; }
+    .live-lbl {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 9px;
+      color: var(--t3);
+      text-align: center;
+      margin-bottom: 3px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .live-lbl.ok { color: var(--ok); }
+    .live-sgrid {
+      display: inline-grid;
+      gap: 1.5px;
+      background: var(--s2);
+      padding: 3px;
+      border-radius: 4px;
+      width: 100%;
+    }
+    .live-sgrid.n3 { grid-template-columns: repeat(3, 1fr); }
+    .live-sgrid.n4 { grid-template-columns: repeat(4, 1fr); }
+    .lsc { border-radius: 2px; aspect-ratio: 1; }
+    .lsc.match   { background: var(--ok); opacity: .8; }
+    .lsc.extra   { background: var(--err); opacity: .8; }
+    .lsc.missing { background: var(--s3); outline: 1.5px solid var(--warn); outline-offset: -1px; }
+    .lsc.off     { background: var(--s3); }
+
+    /* ── ISO section ─────────────────────────── */
+    .iso-section {
+      padding: 0 24px 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .iso-panel {
+      background: var(--s1);
+      border: 1px solid var(--b1);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .iso-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .iso-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 9px;
+      color: var(--t3);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .iso-legend {
+      display: flex;
+      gap: 14px;
+      font-family: 'Barlow', sans-serif;
+      font-size: 10px;
+      color: var(--t3);
+    }
+    .iso-legend span { display: flex; align-items: center; gap: 4px; }
+    .ldot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+
+    /* ── Controls ────────────────────────────── */
+    .controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: 0 24px 14px;
+      max-width: 900px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+    .btn {
+      height: 40px;
+      padding: 0 20px;
+      border-radius: 6px;
+      border: 1px solid var(--b2);
+      background: transparent;
+      color: var(--t1);
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .12s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--s2); border-color: var(--b3); }
+    .btn:active { transform: scale(.97); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--cube-left); }
+    .btn.clear-btn { color: var(--err); border-color: rgba(252,129,129,.2); }
+    .btn.clear-btn:hover { background: rgba(252,129,129,.07); }
+
+    /* ── Result ──────────────────────────────── */
+    .result-section {
+      padding: 0 24px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .result-banner { padding: 14px 18px; border-radius: 10px; display: none; }
+    .result-banner.win {
+      background: rgba(72,187,120,.08);
+      border: 1px solid rgba(72,187,120,.25);
+    }
+    .result-banner.lose {
+      background: rgba(252,129,129,.06);
+      border: 1px solid rgba(252,129,129,.2);
+    }
+    .result-big {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+    .result-big.win { color: var(--ok); }
+    .result-big.lose { color: var(--err); }
+    .result-sub { font-size: 13px; color: var(--t2); }
+
+    /* ── Divider line ─────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--b1);
+      margin: 0 24px;
+      max-width: 900px;
+    }
+
+    /* ── How to play ─────────────────────────── */
+    .instructions {
+      font-size: 11px;
+      color: var(--t3);
+      line-height: 1.7;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--b1);
+    }
+
+    /* ── Responsive ──────────────────────────── */
+    @media (max-width: 620px) {
+      header { padding: 0 14px; }
+      .hstats { gap: 18px; }
+      .hstat-val { font-size: 15px; }
+      .diff-bar { padding: 8px 14px; gap: 3px; }
+      .diff-btn { font-size: 10px; }
+      .main { grid-template-columns: 1fr; padding: 10px 14px; gap: 10px; }
+      .iso-section { padding: 0 14px 10px; }
+      .controls { padding: 0 14px 10px; }
+      .result-section { padding: 0 14px 16px; }
+      .puzzle-meta { padding: 8px 14px 0; }
+      .lgrid.n3 { grid-template-columns: repeat(3, 54px); }
+      .lgrid.n4 { grid-template-columns: repeat(4, 40px); }
+    }
+    @media (max-width: 380px) {
+      .logo { font-size: 14px; }
+      .hstats { gap: 12px; }
+      .lgrid.n3 { grid-template-columns: repeat(3, 48px); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════ -->
+<header>
+  <div class="logo">ISO<em>M</em>ETRY</div>
+  <div class="hstats">
+    <div class="hstat">
+      <div class="hstat-val" id="timer-el">0:00</div>
+      <div class="hstat-lbl">Time</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="moves-el">0</div>
+      <div class="hstat-lbl">Moves</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="streak-el">0</div>
+      <div class="hstat-lbl">Streak</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ DIFFICULTY ═══════════════════════════════ -->
+<div class="diff-bar">
+  <button class="diff-btn active" data-d="easy"   onclick="setDiff('easy')">Easy</button>
+  <button class="diff-btn"        data-d="medium" onclick="setDiff('medium')">Medium</button>
+  <button class="diff-btn"        data-d="hard"   onclick="setDiff('hard')">Hard</button>
+  <button class="diff-btn expert-btn" data-d="expert" onclick="setDiff('expert')">Expert 4×4</button>
+</div>
+
+<!-- ═══ PUZZLE META ══════════════════════════════ -->
+<div class="puzzle-meta">
+  <span class="puzzle-name-el" id="pname">—</span>
+  <span class="daily-badge" id="daily-badge">★ Daily Puzzle</span>
+</div>
+
+<!-- ═══ MAIN GRID ════════════════════════════════ -->
+<div class="main">
+
+  <!-- CLUES -->
+  <div class="panel">
+    <div class="panel-title">Shadow Clues</div>
+    <div class="shadow-group">
+      <div class="shadow-label">↓ Top view</div>
+      <div class="sgrid" id="clue-top"></div>
+    </div>
+    <div class="shadow-group">
+      <div class="shadow-label">↗ Front view</div>
+      <div class="sgrid" id="clue-front"></div>
+    </div>
+    <div class="shadow-group">
+      <div class="shadow-label">↘ Side view</div>
+      <div class="sgrid" id="clue-side"></div>
+    </div>
+    <div class="instructions">
+      Place unit cubes so your structure casts all three shadows exactly. Multiple valid solutions exist — find any one.
+    </div>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="panel">
+    <div class="panel-title" id="editor-title">Build Structure</div>
+    <div class="layer-tabs" id="layer-tabs"></div>
+    <div class="lgrid-wrap">
+      <div class="lgrid" id="lgrid"></div>
+    </div>
+    <div class="orient-hint">← West &nbsp;·&nbsp; East → &nbsp;·&nbsp; top row = North</div>
+    <div class="live-shadows">
+      <div class="live-title">Live Shadows</div>
+      <div class="live-row">
+        <div class="live-view">
+          <div class="live-lbl" id="ll-top">Top</div>
+          <div class="live-sgrid" id="live-top"></div>
+        </div>
+        <div class="live-view">
+          <div class="live-lbl" id="ll-front">Front</div>
+          <div class="live-sgrid" id="live-front"></div>
+        </div>
+        <div class="live-view">
+          <div class="live-lbl" id="ll-side">Side</div>
+          <div class="live-sgrid" id="live-side"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ISO PREVIEW ══════════════════════════════ -->
+<div class="iso-section">
+  <div class="iso-panel">
+    <div class="iso-header">
+      <div class="iso-title">3D Preview</div>
+      <div class="iso-legend">
+        <span><span class="ldot" style="background:#9F7AEA;"></span>Top</span>
+        <span><span class="ldot" style="background:#6B46C1;"></span>Front</span>
+        <span><span class="ldot" style="background:#44337A;"></span>Side</span>
+      </div>
+    </div>
+    <svg id="iso-svg" viewBox="0 0 340 260" style="width:100%;max-width:400px;height:auto;overflow:visible;display:block;"></svg>
+  </div>
+</div>
+
+<!-- ═══ CONTROLS ═════════════════════════════════ -->
+<div class="controls">
+  <button class="btn" onclick="giveHint()">Hint (+5)</button>
+  <button class="btn clear-btn" onclick="clearAll()">Clear</button>
+  <button class="btn primary" onclick="checkSolution()">Check Solution</button>
+  <button class="btn" onclick="nextPuzzle()">Next →</button>
+</div>
+
+<!-- ═══ RESULT ═══════════════════════════════════ -->
+<div class="result-section">
+  <div class="result-banner" id="result-banner">
+    <div class="result-big" id="result-big"></div>
+    <div class="result-sub" id="result-sub"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// PUZZLE DATA  cubes[z][y][x] — z=0 bottom, y=0 front, x=0 left
+// ══════════════════════════════════════════════════
+const PUZZLES = {
+  easy: [
+    { name:"Pyramid", grid:[
+      [[1,1,1],[1,1,1],[1,1,1]],
+      [[0,1,0],[1,1,1],[0,1,0]],
+      [[0,0,0],[0,1,0],[0,0,0]]
+    ]},
+    { name:"The Wall", grid:[
+      [[1,1,1],[0,0,0],[0,0,0]],
+      [[1,1,1],[0,0,0],[0,0,0]],
+      [[1,1,1],[0,0,0],[0,0,0]]
+    ]},
+    { name:"Corner Block", grid:[
+      [[1,1,1],[1,0,0],[1,0,0]],
+      [[1,0,0],[0,0,0],[0,0,0]],
+      [[1,0,0],[0,0,0],[0,0,0]]
+    ]},
+    { name:"The Slab", grid:[
+      [[1,1,1],[1,1,1],[0,0,0]],
+      [[1,1,1],[1,1,1],[0,0,0]],
+      [[0,0,0],[0,0,0],[0,0,0]]
+    ]},
+  ],
+  medium: [
+    { name:"The Arch", grid:[
+      [[1,0,1],[1,0,1],[1,1,1]],
+      [[1,0,1],[0,0,0],[0,0,0]],
+      [[0,0,0],[0,0,0],[0,0,0]]
+    ]},
+    { name:"The Cross", grid:[
+      [[0,1,0],[1,1,1],[0,1,0]],
+      [[0,1,0],[1,0,1],[0,1,0]],
+      [[0,0,0],[0,1,0],[0,0,0]]
+    ]},
+    { name:"Staircase", grid:[
+      [[1,1,1],[0,0,0],[0,0,0]],
+      [[0,1,1],[0,0,0],[0,0,0]],
+      [[0,0,1],[0,0,0],[0,0,0]]
+    ]},
+    { name:"The L-Frame", grid:[
+      [[1,0,0],[1,0,0],[1,1,1]],
+      [[1,0,0],[0,0,0],[0,0,1]],
+      [[0,0,0],[0,0,0],[0,0,1]]
+    ]},
+  ],
+  hard: [
+    { name:"The Diagonal", grid:[
+      [[1,0,0],[0,0,0],[0,0,1]],
+      [[0,0,0],[0,1,0],[0,0,0]],
+      [[1,0,0],[0,0,0],[0,0,1]]
+    ]},
+    { name:"The Prism", grid:[
+      [[1,1,0],[1,1,0],[0,0,0]],
+      [[0,1,1],[0,1,1],[0,0,0]],
+      [[0,0,0],[0,1,0],[0,1,0]]
+    ]},
+    { name:"The Helix", grid:[
+      [[1,0,0],[0,0,0],[0,0,0]],
+      [[0,1,0],[0,1,0],[0,0,0]],
+      [[0,0,0],[0,0,1],[0,0,1]]
+    ]},
+    { name:"Checkerboard", grid:[
+      [[1,0,1],[0,0,0],[1,0,1]],
+      [[0,1,0],[0,1,0],[0,1,0]],
+      [[0,0,0],[0,0,0],[0,0,0]]
+    ]},
+  ],
+  expert: [
+    { name:"The Cathedral", N:4, grid:[
+      [[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,1,1,1]],
+      [[1,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,1]],
+      [[0,1,1,0],[0,0,0,0],[0,0,0,0],[0,1,1,0]],
+      [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]]
+    ]},
+    { name:"The Fortress", N:4, grid:[
+      [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]],
+      [[1,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,1]],
+      [[1,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,1]],
+      [[1,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,1]]
+    ]},
+    { name:"The Spiral", N:4, grid:[
+      [[1,1,1,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]],
+      [[0,0,0,0],[0,1,1,1],[0,1,0,0],[0,1,0,0]],
+      [[0,0,0,0],[0,0,0,0],[0,0,1,1],[0,0,0,1]],
+      [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]]
+    ]},
+    { name:"The Monolith", N:4, grid:[
+      [[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,1,0]],
+      [[0,1,1,0],[0,0,0,0],[0,0,0,0],[0,1,1,0]],
+      [[0,1,1,0],[0,0,0,0],[0,0,0,0],[0,1,1,0]],
+      [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+    ]},
+  ]
+};
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+const S = {
+  diff:'easy', pidx:0, puzzle:null, N:3,
+  user:null, layer:0, moves:0, streak:0,
+  done:false, timerStart:null, timerIv:null,
+  elapsed:0, hint:null
+};
+
+// ══════════════════════════════════════════════════
+// GRID UTILS
+// ══════════════════════════════════════════════════
+function mkGrid(N){ return Array(N).fill(0).map(()=>Array(N).fill(0).map(()=>Array(N).fill(0))); }
+
+function getShadows(grid, N){
+  const top   = Array(N).fill(0).map(()=>Array(N).fill(0));
+  const front = Array(N).fill(0).map(()=>Array(N).fill(0));
+  const side  = Array(N).fill(0).map(()=>Array(N).fill(0));
+  for(let z=0;z<N;z++) for(let y=0;y<N;y++) for(let x=0;x<N;x++)
+    if(grid[z][y][x]){ top[y][x]=1; front[N-1-z][x]=1; side[N-1-z][y]=1; }
+  return {top, front, side};
+}
+
+function gridsEq(a,b,N){
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(a[r][c]!==b[r][c]) return false;
+  return true;
+}
+
+function shadowsMatch(u,t,N){
+  const us=getShadows(u,N), ts=getShadows(t,N);
+  return gridsEq(us.top,ts.top,N) && gridsEq(us.front,ts.front,N) && gridsEq(us.side,ts.side,N);
+}
+
+// ══════════════════════════════════════════════════
+// DAILY SEED
+// ══════════════════════════════════════════════════
+function dailyIdx(diff){
+  const d=new Date();
+  const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  return seed % PUZZLES[diff].length;
+}
+
+// ══════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════
+function startTimer(){
+  S.timerStart = Date.now() - S.elapsed*1000;
+  S.timerIv = setInterval(tickTimer, 500);
+}
+function stopTimer(){ clearInterval(S.timerIv); S.elapsed=Math.floor((Date.now()-S.timerStart)/1000); }
+function resetTimer(){
+  clearInterval(S.timerIv); S.elapsed=0; S.timerStart=null;
+  document.getElementById('timer-el').textContent='0:00';
+}
+function tickTimer(){
+  if(!S.timerStart) return;
+  S.elapsed=Math.floor((Date.now()-S.timerStart)/1000);
+  const m=Math.floor(S.elapsed/60), s=S.elapsed%60;
+  document.getElementById('timer-el').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+}
+
+// ══════════════════════════════════════════════════
+// RENDER SHADOW GRID (clue panel)
+// ══════════════════════════════════════════════════
+function renderClue(id, grid, N){
+  const el=document.getElementById(id);
+  el.className=`sgrid n${N}`;
+  el.innerHTML='';
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    const d=document.createElement('div');
+    d.className='sc '+(grid[r][c]?'on':'off');
+    el.appendChild(d);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// RENDER LIVE SHADOW (editor panel, with comparison)
+// ══════════════════════════════════════════════════
+function renderLive(id, lblId, ug, tg, N, label){
+  const el=document.getElementById(id);
+  el.className=`live-sgrid n${N}`;
+  el.innerHTML='';
+  let ok=true;
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    const d=document.createElement('div');
+    const u=ug[r][c], t=tg[r][c];
+    if(u!==t) ok=false;
+    d.className='lsc '+(u&&t?'match':u&&!t?'extra':!u&&t?'missing':'off');
+    el.appendChild(d);
+  }
+  const lbl=document.getElementById(lblId);
+  lbl.className='live-lbl'+(ok?' ok':'');
+  lbl.textContent=(ok?'✓ ':'')+label;
+  return ok;
+}
+
+// ══════════════════════════════════════════════════
+// RENDER LAYER EDITOR
+// ══════════════════════════════════════════════════
+function renderLayerEditor(){
+  const N=S.N, z=S.layer;
+  const lg=document.getElementById('lgrid');
+  lg.className=`lgrid n${N}`;
+  lg.innerHTML='';
+  const cs=N===3?60:44;
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    const d=document.createElement('div');
+    let cls='lc'+(S.user[z][y][x]?' on':'');
+    if(S.hint && S.hint.z===z && S.hint.y===y && S.hint.x===x && !S.user[z][y][x]) cls+=' hint-cell';
+    d.className=cls;
+    d.style.width=d.style.height=cs+'px';
+    if(!S.done){ const lz=z,ly=y,lx=x; d.onclick=()=>toggleCell(lz,ly,lx); }
+    lg.appendChild(d);
+  }
+  const layerNames3=['Bottom','Middle','Top'];
+  const layerNames4=['Layer 1','Layer 2','Layer 3','Layer 4'];
+  const names=N===3?layerNames3:layerNames4;
+  document.getElementById('editor-title').textContent='Build — '+names[z];
+}
+
+function renderLayerTabs(){
+  const tabs=document.getElementById('layer-tabs');
+  tabs.innerHTML='';
+  const labels=S.N===3?['Bot','Mid','Top']:['L1','L2','L3','L4'];
+  labels.forEach((lbl,i)=>{
+    const b=document.createElement('button');
+    b.className='layer-tab'+(i===S.layer?' active':'');
+    b.textContent=lbl; b.onclick=()=>setLayer(i);
+    tabs.appendChild(b);
+  });
+}
+
+function setLayer(z){ S.layer=z; renderLayerTabs(); renderLayerEditor(); }
+
+// ══════════════════════════════════════════════════
+// ISOMETRIC 3D RENDER — fixed painter's algorithm
+// ══════════════════════════════════════════════════
+function renderISO(){
+  const svg=document.getElementById('iso-svg');
+  svg.innerHTML='';
+  const N=S.N;
+  const SCALE = N<=3 ? 26 : 19;
+  const CX=170, CY=165;
+
+  function iso(gx,gy,gz){
+    return {
+      x:(gx-gy)*SCALE+CX,
+      y:(gx+gy)*SCALE*0.5-gz*SCALE+CY
+    };
+  }
+  function pts(corners){ return corners.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '); }
+  function poly(corners,fill){
+    const el=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    el.setAttribute('points',pts(corners));
+    el.setAttribute('fill',fill);
+    el.setAttribute('stroke','#0A0A0D');
+    el.setAttribute('stroke-width','0.8');
+    el.setAttribute('stroke-linejoin','round');
+    svg.appendChild(el);
+  }
+
+  // Collect cubes
+  const cubes=[];
+  for(let z=0;z<N;z++) for(let y=0;y<N;y++) for(let x=0;x<N;x++)
+    if(S.user[z][y][x]) cubes.push({x,y,z});
+
+  if(cubes.length===0){
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x','170'); t.setAttribute('y','160');
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('fill','#303040');
+    t.setAttribute('font-size','12');
+    t.setAttribute('font-family','Barlow, sans-serif');
+    t.textContent='Click cells to build your structure';
+    svg.appendChild(t);
+    return;
+  }
+
+  // Painter's sort: y desc → x asc → z asc (back-to-front for this camera angle)
+  cubes.sort((a,b)=>{
+    if(b.y!==a.y) return b.y-a.y;
+    if(a.x!==b.x) return a.x-b.x;
+    return a.z-b.z;
+  });
+
+  cubes.forEach(({x,y,z})=>{
+    // Top face (lightest)
+    poly([iso(x,y,z+1),iso(x+1,y,z+1),iso(x+1,y+1,z+1),iso(x,y+1,z+1)], '#9F7AEA');
+    // Front-left face (medium)
+    poly([iso(x,y,z),iso(x+1,y,z),iso(x+1,y,z+1),iso(x,y,z+1)], '#6B46C1');
+    // Front-right face (darkest)
+    poly([iso(x+1,y,z),iso(x+1,y+1,z),iso(x+1,y+1,z+1),iso(x+1,y,z+1)], '#44337A');
+  });
+}
+
+// ══════════════════════════════════════════════════
+// FULL RENDER PASS
+// ══════════════════════════════════════════════════
+function renderAll(){
+  const N=S.N;
+  const ts=getShadows(S.puzzle.grid,N);
+  const us=getShadows(S.user,N);
+
+  renderClue('clue-top',   ts.top,   N);
+  renderClue('clue-front', ts.front, N);
+  renderClue('clue-side',  ts.side,  N);
+
+  renderLive('live-top',   'll-top',   us.top,   ts.top,   N, 'Top');
+  renderLive('live-front', 'll-front', us.front, ts.front, N, 'Front');
+  renderLive('live-side',  'll-side',  us.side,  ts.side,  N, 'Side');
+
+  renderLayerEditor();
+  renderISO();
+
+  document.getElementById('moves-el').textContent  = S.moves;
+  document.getElementById('streak-el').textContent = S.streak;
+}
+
+// ══════════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════════
+function toggleCell(z,y,x){
+  if(S.done) return;
+  S.user[z][y][x] ^= 1;
+  S.moves++;
+  if(!S.timerStart) startTimer();
+  renderAll();
+}
+
+function checkSolution(){
+  if(S.done) return;
+  const win=shadowsMatch(S.user,S.puzzle.grid,S.N);
+  const banner=document.getElementById('result-banner');
+  const big=document.getElementById('result-big');
+  const sub=document.getElementById('result-sub');
+  banner.style.display='block';
+
+  if(win){
+    stopTimer();
+    S.done=true; S.streak++;
+    const m=Math.floor(S.elapsed/60), s=S.elapsed%60;
+    banner.className='result-banner win';
+    big.className='result-big win';
+    big.textContent=S.moves<=8?'Extraordinary.':S.moves<=16?'Brilliant.':S.moves<=30?'Solved.':'Got it.';
+    sub.textContent=`${S.puzzle.name} — ${S.moves} moves · ${m}:${s.toString().padStart(2,'0')}`;
+    document.getElementById('streak-el').textContent=S.streak;
+  } else {
+    banner.className='result-banner lose';
+    big.className='result-big lose';
+    big.textContent='Not yet.';
+    sub.textContent='Your live shadows above show exactly where the mismatches are.';
+    setTimeout(()=>{ if(!S.done) banner.style.display='none'; },3500);
+  }
+}
+
+function clearAll(){
+  S.user=mkGrid(S.N); S.moves=0; S.done=false; S.hint=null;
+  resetTimer();
+  document.getElementById('result-banner').style.display='none';
+  renderAll();
+}
+
+function giveHint(){
+  if(S.done) return;
+  const N=S.N, tg=S.puzzle.grid;
+  const missing=[];
+  for(let z=0;z<N;z++) for(let y=0;y<N;y++) for(let x=0;x<N;x++)
+    if(tg[z][y][x] && !S.user[z][y][x]) missing.push({x,y,z});
+
+  if(!missing.length){ checkSolution(); return; }
+  const h=missing[Math.floor(Math.random()*missing.length)];
+  S.hint=h; S.moves+=5;
+  setLayer(h.z);
+  renderAll();
+  document.getElementById('moves-el').textContent=S.moves;
+  setTimeout(()=>{ S.hint=null; renderLayerEditor(); }, 3000);
+}
+
+function nextPuzzle(){
+  const pool=PUZZLES[S.diff];
+  S.pidx=(S.pidx+1)%pool.length;
+  loadPuzzle(S.diff, S.pidx, false);
+}
+
+// ══════════════════════════════════════════════════
+// LOAD PUZZLE
+// ══════════════════════════════════════════════════
+function loadPuzzle(diff, idx, isDaily){
+  const p=PUZZLES[diff][idx];
+  S.diff=diff; S.pidx=idx; S.puzzle=p;
+  S.N=p.N||3; S.user=mkGrid(S.N);
+  S.layer=0; S.moves=0; S.done=false; S.hint=null;
+  resetTimer();
+  document.getElementById('result-banner').style.display='none';
+  document.getElementById('pname').textContent=p.name;
+  document.getElementById('daily-badge').style.display=isDaily?'inline-block':'none';
+  renderLayerTabs();
+  renderAll();
+}
+
+function setDiff(diff){
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`[data-d="${diff}"]`).classList.add('active');
+  loadPuzzle(diff, dailyIdx(diff), true);
+}
+
+// ══════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════
+setDiff('easy');
+</script>
+</body>
+</html>
