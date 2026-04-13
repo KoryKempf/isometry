@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Isometry — A Daily Spatial Reasoning Puzzle</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,2 28,9 16,16 4,9' fill='%239F7AEA'/%3E%3Cpolygon points='4,9 16,16 16,30 4,23' fill='%236B46C1'/%3E%3Cpolygon points='28,9 16,16 16,30 28,23' fill='%2344337A'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&family=Barlow:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root[data-theme="dark"] {
+      --bg:#0A0A0D; --s1:#111116; --s2:#18181F; --s3:#222229;
+      --b1:rgba(255,255,255,.05); --b2:rgba(255,255,255,.10); --b3:rgba(255,255,255,.20);
+      --t1:#EEEEF2; --t2:#9090A0; --t3:#505060;
+      --accent:#805AD5; --accent2:#6B46C1;
+      --ok:#48BB78; --warn:#ECC94B; --err:#FC8181;
+      --cube-top:#9F7AEA; --cube-l:#6B46C1; --cube-r:#44337A;
+      --stroke:#0A0A0D;
+    }
+    :root[data-theme="light"] {
+      --bg:#F4F3EF; --s1:#FFFFFF; --s2:#EEECEA; --s3:#E0DED9;
+      --b1:rgba(0,0,0,.06); --b2:rgba(0,0,0,.10); --b3:rgba(0,0,0,.18);
+      --t1:#1A1A22; --t2:#5A5A6A; --t3:#9090A0;
+      --accent:#6B46C1; --accent2:#553499;
+      --ok:#2F855A; --warn:#B7791F; --err:#C53030;
+      --cube-top:#9F7AEA; --cube-l:#6B46C1; --cube-r:#44337A;
+      --stroke:#F4F3EF;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--t1);font-family:'Barlow',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s;}
+
+    /* HEADER */
+    header{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;border-bottom:1px solid var(--b1);position:sticky;top:0;background:var(--bg);z-index:10;transition:background .25s;}
+    .logo{display:flex;align-items:center;gap:9px;font-family:'Chakra Petch',sans-serif;font-size:17px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--t1);user-select:none;}
+    .logo em{color:var(--cube-top);font-style:normal;}
+    .hstats{display:flex;gap:24px;}
+    .hstat{display:flex;flex-direction:column;align-items:center;gap:1px;}
+    .hstat-val{font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--t1);line-height:1;}
+    .hstat-lbl{font-family:'Chakra Petch',sans-serif;font-size:9px;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;}
+    .header-right{display:flex;align-items:center;gap:14px;}
+
+    /* THEME TOGGLE */
+    .theme-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;}
+    .theme-icon{font-size:12px;color:var(--t3);}
+    .toggle-track{width:36px;height:19px;border-radius:20px;background:var(--s3);border:1px solid var(--b2);position:relative;cursor:pointer;transition:background .2s;}
+    .toggle-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);position:absolute;top:2px;left:2px;transition:transform .2s;}
+    [data-theme="light"] .toggle-thumb{transform:translateX(17px);}
+
+    /* DIFF */
+    .diff-bar{display:flex;gap:4px;padding:10px 24px;border-bottom:1px solid var(--b1);}
+    .diff-btn{flex:1;height:32px;border:1px solid var(--b2);background:transparent;color:var(--t2);font-family:'Chakra Petch',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;border-radius:4px;cursor:pointer;transition:all .15s;text-transform:uppercase;}
+    .diff-btn:hover{color:var(--t1);border-color:var(--b3);}
+    .diff-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .expert-btn{border-color:rgba(252,129,129,.2);}
+    .expert-btn.active{background:#C53030;border-color:#C53030;}
+
+    /* META */
+    .puzzle-meta{display:flex;align-items:center;gap:10px;padding:10px 24px 0;max-width:900px;margin:0 auto;flex-wrap:wrap;}
+    .puzzle-name-el{font-family:'Chakra Petch',sans-serif;font-size:12px;color:var(--t2);letter-spacing:.08em;text-transform:uppercase;}
+    .daily-badge{font-family:'Chakra Petch',sans-serif;font-size:10px;color:var(--warn);background:rgba(236,201,75,.08);border:1px solid rgba(236,201,75,.2);border-radius:20px;padding:2px 10px;letter-spacing:.08em;}
+    .par-badge{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--ok);background:rgba(72,187,120,.08);border:1px solid rgba(72,187,120,.2);border-radius:20px;padding:2px 10px;}
+
+    /* MAIN */
+    .main{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 24px;max-width:900px;margin:0 auto;}
+    .panel{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:16px;transition:background .25s;}
+    .panel-title{font-family:'Chakra Petch',sans-serif;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--t3);margin-bottom:14px;}
+
+    /* CLUE GRIDS */
+    .shadow-group{margin-bottom:13px;}
+    .shadow-label{font-family:'Chakra Petch',sans-serif;font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;}
+    .sgrid{display:inline-grid;gap:2px;background:var(--s2);padding:4px;border-radius:5px;}
+    .sgrid.n3{grid-template-columns:repeat(3,22px);}
+    .sgrid.n4{grid-template-columns:repeat(4,17px);}
+    .sc{border-radius:2px;}
+    .sgrid.n3 .sc{width:22px;height:22px;}
+    .sgrid.n4 .sc{width:17px;height:17px;}
+    .sc.on{background:var(--accent);}
+    .sc.off{background:var(--s3);}
+
+    /* EDITOR */
+    .layer-tabs{display:flex;gap:3px;margin-bottom:10px;}
+    .layer-tab{flex:1;height:28px;border:1px solid var(--b2);background:transparent;color:var(--t2);font-family:'Chakra Petch',sans-serif;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;cursor:pointer;transition:all .12s;}
+    .layer-tab:hover{color:var(--t1);}
+    .layer-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .lgrid-wrap{display:flex;justify-content:center;margin-bottom:8px;}
+    .lgrid{display:inline-grid;gap:5px;}
+    .lgrid.n3{grid-template-columns:repeat(3,60px);}
+    .lgrid.n4{grid-template-columns:repeat(4,44px);}
+    .lc{aspect-ratio:1;border-radius:5px;border:1px solid var(--b2);background:var(--s2);cursor:pointer;transition:border-color .12s,background .12s,transform .08s;}
+    .lc:hover{border-color:var(--cube-top);background:var(--s3);}
+    .lc:active{transform:scale(.94);}
+    .lc.on{background:var(--accent);border-color:var(--cube-top);}
+    .lc.on:hover{background:var(--accent2);}
+    .lc.hint-cell{border-color:var(--warn);background:rgba(236,201,75,.15);animation:hint-pulse .7s ease-in-out infinite alternate;}
+    @keyframes hint-pulse{from{opacity:.5}to{opacity:1}}
+    .orient-hint{font-size:10px;color:var(--t3);text-align:center;margin-bottom:10px;}
+
+    /* LIVE VIEWS */
+    .live-shadows{border-top:1px solid var(--b1);padding-top:10px;}
+    .live-title{font-family:'Chakra Petch',sans-serif;font-size:9px;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+    .live-row{display:flex;gap:6px;align-items:flex-start;}
+    .live-view{flex:1;}
+    .live-lbl{font-family:'Chakra Petch',sans-serif;font-size:9px;color:var(--t3);text-align:center;margin-bottom:3px;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;}
+    .live-lbl.ok{color:var(--ok);}
+    .live-sgrid{display:inline-grid;gap:1.5px;background:var(--s2);padding:3px;border-radius:4px;width:100%;}
+    .live-sgrid.n3{grid-template-columns:repeat(3,1fr);}
+    .live-sgrid.n4{grid-template-columns:repeat(4,1fr);}
+    .lsc{border-radius:2px;aspect-ratio:1;}
+    .lsc.match{background:var(--ok);opacity:.8;}
+    .lsc.extra{background:var(--err);opacity:.8;}
+    .lsc.missing{background:var(--s3);outline:1.5px solid var(--warn);outline-offset:-1px;}
+    .lsc.empty{background:var(--s3);}
+
+    /* ISO */
+    .iso-section{padding:0 24px 12px;max-width:900px;margin:0 auto;}
+    .iso-panel{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:16px;transition:background .25s;}
+    .iso-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+    .iso-title{font-family:'Chakra Petch',sans-serif;font-size:9px;color:var(--t3);letter-spacing:.14em;text-transform:uppercase;}
+    .iso-legend{display:flex;gap:14px;font-family:'Barlow',sans-serif;font-size:10px;color:var(--t3);}
+    .iso-legend span{display:flex;align-items:center;gap:4px;}
+    .ldot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0;}
+    #iso-canvas{display:block;margin:0 auto;max-width:100%;}
+
+    /* CONTROLS */
+    .controls{display:flex;gap:8px;justify-content:center;padding:0 24px 14px;max-width:900px;margin:0 auto;flex-wrap:wrap;}
+    .btn{height:40px;padding:0 20px;border-radius:6px;border:1px solid var(--b2);background:transparent;color:var(--t1);font-family:'Chakra Petch',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .12s;white-space:nowrap;}
+    .btn:hover{background:var(--s2);border-color:var(--b3);}
+    .btn:active{transform:scale(.97);}
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .btn.primary:hover{background:var(--accent2);}
+    .btn.clear-btn{color:var(--err);border-color:rgba(252,129,129,.2);}
+    .btn.clear-btn:hover{background:rgba(252,129,129,.07);}
+
+    /* RESULT */
+    .result-section{padding:0 24px 24px;max-width:900px;margin:0 auto;}
+    .result-banner{padding:14px 18px;border-radius:10px;display:none;}
+    .result-banner.win{background:rgba(72,187,120,.08);border:1px solid rgba(72,187,120,.25);}
+    .result-banner.lose{background:rgba(252,129,129,.06);border:1px solid rgba(252,129,129,.2);}
+    .result-big{font-family:'Chakra Petch',sans-serif;font-size:16px;font-weight:700;letter-spacing:.08em;margin-bottom:4px;}
+    .result-big.win{color:var(--ok);}
+    .result-big.lose{color:var(--err);}
+    .result-sub{font-size:13px;color:var(--t2);}
+    .result-par{font-size:12px;color:var(--t3);margin-top:4px;}
+
+    /* INSTRUCTIONS */
+    .instructions{font-size:11px;color:var(--t3);line-height:1.7;margin-top:12px;padding-top:12px;border-top:1px solid var(--b1);}
+
+    /* LEGEND */
+    .legend-row{display:flex;gap:14px;justify-content:center;font-size:10px;color:var(--t3);padding:0 24px 10px;max-width:900px;margin:0 auto;flex-wrap:wrap;}
+    .legend-item{display:flex;align-items:center;gap:5px;}
+    .legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+    @media(max-width:620px){
+      header{padding:0 14px;}
+      .hstats{gap:16px;}
+      .hstat-val{font-size:14px;}
+      .diff-bar{padding:8px 14px;gap:3px;}
+      .diff-btn{font-size:9px;letter-spacing:.05em;}
+      .main{grid-template-columns:1fr;padding:10px 14px;gap:10px;}
+      .iso-section{padding:0 14px 10px;}
+      .controls{padding:0 14px 10px;gap:6px;}
+      .result-section{padding:0 14px 16px;}
+      .puzzle-meta{padding:8px 14px 0;}
+      .lgrid.n3{grid-template-columns:repeat(3,54px);}
+      .lgrid.n4{grid-template-columns:repeat(4,40px);}
+      .btn{height:36px;padding:0 14px;font-size:10px;}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <polygon points="13,2 22,7.5 13,13 4,7.5" fill="#9F7AEA"/>
+      <polygon points="4,7.5 13,13 13,23 4,17.5" fill="#6B46C1"/>
+      <polygon points="22,7.5 13,13 13,23 22,17.5" fill="#44337A"/>
+    </svg>
+    <span>ISO<em>M</em>ETRY</span>
+  </div>
+
+  <div class="hstats">
+    <div class="hstat"><div class="hstat-val" id="timer-el">0:00</div><div class="hstat-lbl">Time</div></div>
+    <div class="hstat"><div class="hstat-val" id="moves-el">0</div><div class="hstat-lbl">Moves</div></div>
+    <div class="hstat"><div class="hstat-val" id="streak-el">0</div><div class="hstat-lbl">Streak</div></div>
+  </div>
+
+  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+    <span class="theme-icon">☽</span>
+    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+    <span class="theme-icon">☀</span>
+  </div>
+</header>
+
+<div class="diff-bar">
+  <button class="diff-btn active" data-d="easy"   onclick="setDiff('easy')">Easy</button>
+  <button class="diff-btn"        data-d="medium" onclick="setDiff('medium')">Medium</button>
+  <button class="diff-btn"        data-d="hard"   onclick="setDiff('hard')">Hard</button>
+  <button class="diff-btn expert-btn" data-d="expert" onclick="setDiff('expert')">Expert 4×4</button>
+</div>
+
+<div class="puzzle-meta">
+  <span class="puzzle-name-el" id="pname">—</span>
+  <span class="daily-badge"    id="daily-badge" style="display:none">★ Daily Puzzle</span>
+  <span class="par-badge"      id="par-badge"   style="display:none"></span>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <div class="panel-title">Orthographic Views</div>
+    <div class="shadow-group"><div class="shadow-label">↓ Top view</div><div class="sgrid" id="clue-top"></div></div>
+    <div class="shadow-group"><div class="shadow-label">↗ Front view</div><div class="sgrid" id="clue-front"></div></div>
+    <div class="shadow-group"><div class="shadow-label">↘ Side view</div><div class="sgrid" id="clue-side"></div></div>
+    <div class="instructions">Reconstruct the 3D structure from its three orthographic views. Place unit cubes so your structure matches all three exactly. Multiple valid solutions exist — find any one.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title" id="editor-title">Build Structure — Top Layer</div>
+    <div class="layer-tabs" id="layer-tabs"></div>
+    <div class="lgrid-wrap"><div class="lgrid" id="lgrid"></div></div>
+    <div class="orient-hint">← West &nbsp;·&nbsp; East → &nbsp;·&nbsp; top row = North</div>
+    <div class="live-shadows">
+      <div class="live-title">Live Views</div>
+      <div class="live-row">
+        <div class="live-view"><div class="live-lbl" id="ll-top">Top</div><div class="live-sgrid" id="live-top"></div></div>
+        <div class="live-view"><div class="live-lbl" id="ll-front">Front</div><div class="live-sgrid" id="live-front"></div></div>
+        <div class="live-view"><div class="live-lbl" id="ll-side">Side</div><div class="live-sgrid" id="live-side"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="iso-section">
+  <div class="iso-panel">
+    <div class="iso-header">
+      <div class="iso-title">3D Preview</div>
+      <div class="iso-legend">
+        <span><span class="ldot" style="background:#9F7AEA;"></span>Top</span>
+        <span><span class="ldot" style="background:#6B46C1;"></span>Left</span>
+        <span><span class="ldot" style="background:#44337A;"></span>Right</span>
+      </div>
+    </div>
+    <canvas id="iso-canvas" width="500" height="280"></canvas>
+  </div>
+</div>
+
+<div class="legend-row">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--ok);opacity:.8;"></div>View match</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--err);opacity:.8;"></div>Extra cube</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--s3);outline:1.5px solid var(--warn);outline-offset:-1px;"></div>Missing cube</div>
+</div>
+
+<div class="controls">
+  <button class="btn" onclick="giveHint()">Hint (+5 moves)</button>
+  <button class="btn clear-btn" onclick="clearAll()">Clear</button>
+  <button class="btn primary" onclick="checkSolution()">Check Solution</button>
+  <button class="btn" onclick="nextPuzzle()">Next Puzzle →</button>
+</div>
+
+<div class="result-section">
+  <div class="result-banner" id="result-banner">
+    <div class="result-big" id="result-big"></div>
+    <div class="result-sub" id="result-sub"></div>
+    <div class="result-par" id="result-par"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// PUZZLE DATA
+// grid[z][y][x]:  z=0 bottom, z=N-1 top
+//                 y=0 north,  x=0 west
+// par = cube count in the reference solution
+// ══════════════════════════════════════════
+const PUZZLES = {
+  easy:[
+    {name:"The Pyramid",par:13,grid:[[[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[0,1,0]],[[0,0,0],[0,1,0],[0,0,0]]]},
+    {name:"The Wall",   par:9, grid:[[[1,1,1],[1,1,1],[1,1,1]],[[0,0,0],[0,0,0],[0,0,0]],[[0,0,0],[0,0,0],[0,0,0]]]},
+    {name:"Corner Block",par:5,grid:[[[1,1,1],[1,0,0],[1,0,0]],[[1,0,0],[0,0,0],[0,0,0]],[[1,0,0],[0,0,0],[0,0,0]]]},
+    {name:"The Slab",   par:6, grid:[[[1,1,1],[1,1,1],[0,0,0]],[[0,0,0],[0,0,0],[0,0,0]],[[0,0,0],[0,0,0],[0,0,0]]]},
+  ],
+  medium:[
+    {name:"The Arch",   par:7, grid:[[[1,0,1],[1,0,1],[1,1,1]],[[1,0,1],[0,0,0],[0,0,0]],[[0,0,0],[0,0,0],[0,0,0]]]},
+    {name:"The Cross",  par:9, grid:[[[0,1,0],[1,1,1],[0,1,0]],[[0,1,0],[1,0,1],[0,1,0]],[[0,0,0],[0,1,0],[0,0,0]]]},
+    {name:"Staircase",  par:6, grid:[[[1,1,1],[0,0,0],[0,0,0]],[[0,1,1],[0,0,0],[0,0,0]],[[0,0,1],[0,0,0],[0,0,0]]]},
+    {name:"The L-Frame",par:8, grid:[[[1,0,0],[1,0,0],[1,1,1]],[[1,0,0],[0,0,0],[0,0,1]],[[0,0,0],[0,0,0],[0,0,1]]]},
+  ],
+  hard:[
+    {name:"The Diagonal",  par:3, grid:[[[1,0,0],[0,0,0],[0,0,0]],[[0,0,0],[0,1,0],[0,0,0]],[[0,0,0],[0,0,0],[0,0,1]]]},
+    {name:"The Prism",     par:8, grid:[[[1,1,0],[1,1,0],[0,0,0]],[[0,1,1],[0,1,1],[0,0,0]],[[0,0,0],[0,1,0],[0,1,0]]]},
+    {name:"The Helix",     par:5, grid:[[[1,0,0],[0,0,0],[0,0,0]],[[0,1,0],[0,1,0],[0,0,0]],[[0,0,0],[0,0,1],[0,0,1]]]},
+    {name:"Checkerboard",  par:8, grid:[[[1,0,1],[0,0,0],[1,0,1]],[[0,1,0],[0,1,0],[0,1,0]],[[0,0,0],[0,0,0],[0,0,0]]]},
+  ],
+  expert:[
+    {name:"The Cathedral",N:4,par:16,grid:[[[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,1,1,1]],[[1,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,1]],[[0,1,1,0],[0,0,0,0],[0,0,0,0],[0,1,1,0]],[[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]]]},
+    {name:"The Fortress", N:4,par:20,grid:[[[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]],[[1,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,1]],[[1,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,1]],[[1,0,0,1],[0,0,0,0],[0,0,0,0],[1,0,0,1]]]},
+    {name:"The Spiral",   N:4,par:8, grid:[[[1,1,1,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]],[[0,0,0,0],[0,1,1,1],[0,1,0,0],[0,1,0,0]],[[0,0,0,0],[0,0,0,0],[0,0,1,1],[0,0,0,1]],[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]]]},
+    {name:"The Monolith", N:4,par:16,grid:[[[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,1,0]],[[0,1,1,0],[0,0,0,0],[0,0,0,0],[0,1,1,0]],[[0,1,1,0],[0,0,0,0],[0,0,0,0],[0,1,1,0]],[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]]},
+  ]
+};
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const S={diff:'easy',pidx:0,puzzle:null,N:3,user:null,layer:2,moves:0,streak:0,done:false,timerStart:null,timerIv:null,elapsed:0,hint:null};
+
+// ══════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════
+function toggleTheme(){
+  const h=document.documentElement;
+  const next=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',next);
+  localStorage.setItem('isometry-theme',next);
+  renderISO();
+}
+(()=>{const t=localStorage.getItem('isometry-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+
+// ══════════════════════════════════════════
+// GRID MATH
+// ══════════════════════════════════════════
+function mkGrid(N){return Array(N).fill(0).map(()=>Array(N).fill(0).map(()=>Array(N).fill(0)));}
+
+function getShadows(grid,N){
+  const top=Array(N).fill(0).map(()=>Array(N).fill(0));
+  const front=Array(N).fill(0).map(()=>Array(N).fill(0));
+  const side=Array(N).fill(0).map(()=>Array(N).fill(0));
+  for(let z=0;z<N;z++)for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    if(grid[z][y][x]){
+      top[y][x]=1;
+      front[N-1-z][x]=1;
+      side[N-1-z][y]=1;
+    }
+  }
+  return{top,front,side};
+}
+
+function gridsEq(a,b,N){for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(a[r][c]!==b[r][c])return false;return true;}
+function shadowsMatch(u,t,N){const us=getShadows(u,N),ts=getShadows(t,N);return gridsEq(us.top,ts.top,N)&&gridsEq(us.front,ts.front,N)&&gridsEq(us.side,ts.side,N);}
+function countCubes(grid,N){let c=0;for(let z=0;z<N;z++)for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(grid[z][y][x])c++;return c;}
+
+// ══════════════════════════════════════════
+// DAILY SEED
+// ══════════════════════════════════════════
+function dailyIdx(diff){const d=new Date();const s=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();return s%PUZZLES[diff].length;}
+
+// ══════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════
+function startTimer(){S.timerStart=Date.now()-S.elapsed*1000;S.timerIv=setInterval(tickTimer,500);}
+function stopTimer(){clearInterval(S.timerIv);S.elapsed=Math.floor((Date.now()-S.timerStart)/1000);}
+function resetTimer(){clearInterval(S.timerIv);S.elapsed=0;S.timerStart=null;document.getElementById('timer-el').textContent='0:00';}
+function tickTimer(){if(!S.timerStart)return;S.elapsed=Math.floor((Date.now()-S.timerStart)/1000);const m=Math.floor(S.elapsed/60),s=S.elapsed%60;document.getElementById('timer-el').textContent=`${m}:${s.toString().padStart(2,'0')}`;}
+
+// ══════════════════════════════════════════
+// RENDER CLUE
+// ══════════════════════════════════════════
+function renderClue(id,grid,N){
+  const el=document.getElementById(id);
+  el.className=`sgrid n${N}`;el.innerHTML='';
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){const d=document.createElement('div');d.className='sc '+(grid[r][c]?'on':'off');el.appendChild(d);}
+}
+
+// ══════════════════════════════════════════
+// RENDER LIVE SHADOW
+// ══════════════════════════════════════════
+function renderLive(id,lblId,ug,tg,N,label){
+  const el=document.getElementById(id);
+  el.className=`live-sgrid n${N}`;el.innerHTML='';
+  let ok=true;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const d=document.createElement('div');
+    const u=ug[r][c],t=tg[r][c];
+    if(u!==t)ok=false;
+    d.className='lsc '+(u&&t?'match':u&&!t?'extra':!u&&t?'missing':'empty');
+    el.appendChild(d);
+  }
+  const lbl=document.getElementById(lblId);
+  lbl.className='live-lbl'+(ok?' ok':'');
+  lbl.textContent=(ok?'✓ ':'')+label;
+  return ok;
+}
+
+// ══════════════════════════════════════════
+// LAYER TABS  — Top leftmost, Bottom rightmost
+// ══════════════════════════════════════════
+function renderLayerTabs(){
+  const tabs=document.getElementById('layer-tabs');
+  tabs.innerHTML='';
+  const N=S.N;
+  // Always rendered Top → ... → Bottom (left to right)
+  const entries=N===3
+    ?[{z:2,l:'Top'},{z:1,l:'Middle'},{z:0,l:'Bottom'}]
+    :[{z:3,l:'Top'},{z:2,l:'Layer 3'},{z:1,l:'Layer 2'},{z:0,l:'Bottom'}];
+  entries.forEach(({z,l})=>{
+    const b=document.createElement('button');
+    b.className='layer-tab'+(z===S.layer?' active':'');
+    b.textContent=l;
+    b.onclick=()=>setLayer(z);
+    tabs.appendChild(b);
+  });
+}
+
+// ══════════════════════════════════════════
+// RENDER LAYER EDITOR
+// ══════════════════════════════════════════
+function renderLayerEditor(){
+  const N=S.N,z=S.layer;
+  const lg=document.getElementById('lgrid');
+  lg.className=`lgrid n${N}`;lg.innerHTML='';
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const d=document.createElement('div');
+    let cls='lc'+(S.user[z][y][x]?' on':'');
+    if(S.hint&&S.hint.z===z&&S.hint.y===y&&S.hint.x===x&&!S.user[z][y][x])cls+=' hint-cell';
+    d.className=cls;
+    if(!S.done){const lz=z,ly=y,lx=x;d.onclick=()=>toggleCell(lz,ly,lx);}
+    lg.appendChild(d);
+  }
+  const layerNames3=['Bottom','Middle','Top'];
+  const layerNames4=['Bottom','Layer 2','Layer 3','Top'];
+  document.getElementById('editor-title').textContent='Build Structure — '+(N===3?layerNames3:layerNames4)[z];
+}
+
+function setLayer(z){S.layer=z;renderLayerTabs();renderLayerEditor();}
+
+// ══════════════════════════════════════════
+// CANVAS ISO RENDER
+// Correct painter's algorithm:
+//   draw back-to-front: high y first (far back),
+//   then low x (left), then low z (bottom)
+// ══════════════════════════════════════════
+function renderISO(){
+  const canvas=document.getElementById('iso-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const N=S.N;
+  const isDark=document.documentElement.getAttribute('data-theme')!=='light';
+  const SCALE=N<=3?36:25;
+  const CX=W/2, CY=H/2+(N<=3?22:15);
+  const cos30=Math.cos(Math.PI/6), sin30=Math.sin(Math.PI/6);
+
+  function iso(gx,gy,gz){
+    return{
+      x:(gx-gy)*SCALE*cos30+CX,
+      y:(gx+gy)*SCALE*sin30-gz*SCALE+CY
+    };
+  }
+
+  function face(pts,fill){
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x,pts[0].y);
+    for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+    ctx.closePath();
+    ctx.fillStyle=fill;
+    ctx.fill();
+    ctx.strokeStyle=isDark?'rgba(0,0,0,0.6)':'rgba(255,255,255,0.5)';
+    ctx.lineWidth=0.7;
+    ctx.stroke();
+  }
+
+  const cubes=[];
+  for(let z=0;z<N;z++)for(let y=0;y<N;y++)for(let x=0;x<N;x++)
+    if(S.user[z][y][x])cubes.push({x,y,z});
+
+  if(!cubes.length){
+    ctx.fillStyle=isDark?'#30304A':'#AAAAB8';
+    ctx.font='12px Barlow,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('Click cells to build your structure',CX,CY);
+    return;
+  }
+
+  // Sort: far back (high y) first, then left (low x), then bottom (low z)
+  cubes.sort((a,b)=>{
+    if(b.y!==a.y)return b.y-a.y;
+    if(a.x!==b.x)return a.x-b.x;
+    return a.z-b.z;
+  });
+
+  cubes.forEach(({x,y,z})=>{
+    // Top face
+    face([iso(x,y,z+1),iso(x+1,y,z+1),iso(x+1,y+1,z+1),iso(x,y+1,z+1)],'#9F7AEA');
+    // Left face (north-facing, visible on left side)
+    face([iso(x,y,z),iso(x+1,y,z),iso(x+1,y,z+1),iso(x,y,z+1)],'#6B46C1');
+    // Right face (east-facing, visible on right side)
+    face([iso(x+1,y,z),iso(x+1,y+1,z),iso(x+1,y+1,z+1),iso(x+1,y,z+1)],'#44337A');
+  });
+}
+
+// ══════════════════════════════════════════
+// FULL RENDER
+// ══════════════════════════════════════════
+function renderAll(){
+  const N=S.N;
+  const ts=getShadows(S.puzzle.grid,N);
+  const us=getShadows(S.user,N);
+  renderClue('clue-top',ts.top,N);
+  renderClue('clue-front',ts.front,N);
+  renderClue('clue-side',ts.side,N);
+  renderLive('live-top','ll-top',us.top,ts.top,N,'Top');
+  renderLive('live-front','ll-front',us.front,ts.front,N,'Front');
+  renderLive('live-side','ll-side',us.side,ts.side,N,'Side');
+  renderLayerTabs();
+  renderLayerEditor();
+  renderISO();
+  document.getElementById('moves-el').textContent=S.moves;
+  document.getElementById('streak-el').textContent=S.streak;
+}
+
+// ══════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════
+function toggleCell(z,y,x){
+  if(S.done)return;
+  S.user[z][y][x]^=1;
+  S.moves++;
+  if(!S.timerStart)startTimer();
+  renderAll();
+}
+
+function checkSolution(){
+  if(S.done)return;
+  const win=shadowsMatch(S.user,S.puzzle.grid,S.N);
+  const banner=document.getElementById('result-banner');
+  const big=document.getElementById('result-big');
+  const sub=document.getElementById('result-sub');
+  const par=document.getElementById('result-par');
+  banner.style.display='block';
+  if(win){
+    stopTimer();
+    S.done=true;S.streak++;
+    const m=Math.floor(S.elapsed/60),sv=S.elapsed%60;
+    const timeStr=`${m}:${sv.toString().padStart(2,'0')}`;
+    const placed=countCubes(S.user,S.N);
+    banner.className='result-banner win';
+    big.className='result-big win';
+    const ratio=S.moves/S.puzzle.par;
+    big.textContent=ratio<=1.2?'Extraordinary.':ratio<=2?'Brilliant.':ratio<=3?'Solved.':'Got it.';
+    sub.textContent=`${S.puzzle.name} — ${S.moves} moves · ${timeStr} · ${placed} cubes`;
+    const diff=S.moves-S.puzzle.par;
+    par.textContent=diff===0?`✦ Perfect — matched par of ${S.puzzle.par}!`:`Par: ${S.puzzle.par} · You were ${diff>0?diff+' over':'under'} par`;
+    document.getElementById('streak-el').textContent=S.streak;
+  } else {
+    banner.className='result-banner lose';
+    big.className='result-big lose';
+    big.textContent='Not quite.';
+    sub.textContent='Check your live views — mismatches are highlighted.';
+    par.textContent='';
+    setTimeout(()=>{if(!S.done)banner.style.display='none';},3500);
+  }
+}
+
+function clearAll(){
+  S.user=mkGrid(S.N);S.moves=0;S.done=false;S.hint=null;
+  resetTimer();
+  document.getElementById('result-banner').style.display='none';
+  renderAll();
+}
+
+function giveHint(){
+  if(S.done)return;
+  const N=S.N,tg=S.puzzle.grid;
+  const missing=[];
+  for(let z=0;z<N;z++)for(let y=0;y<N;y++)for(let x=0;x<N;x++)
+    if(tg[z][y][x]&&!S.user[z][y][x])missing.push({x,y,z});
+  if(!missing.length){checkSolution();return;}
+  const h=missing[Math.floor(Math.random()*missing.length)];
+  S.hint=h;S.moves+=5;
+  setLayer(h.z);
+  renderAll();
+  document.getElementById('moves-el').textContent=S.moves;
+  setTimeout(()=>{S.hint=null;renderLayerEditor();},3000);
+}
+
+function nextPuzzle(){
+  S.pidx=(S.pidx+1)%PUZZLES[S.diff].length;
+  loadPuzzle(S.diff,S.pidx,false);
+}
+
+// ══════════════════════════════════════════
+// LOAD PUZZLE
+// ══════════════════════════════════════════
+function loadPuzzle(diff,idx,isDaily){
+  const p=PUZZLES[diff][idx];
+  S.diff=diff;S.pidx=idx;S.puzzle=p;
+  S.N=p.N||3;
+  S.user=mkGrid(S.N);
+  S.layer=S.N-1;  // start on top layer
+  S.moves=0;S.done=false;S.hint=null;
+  resetTimer();
+  document.getElementById('result-banner').style.display='none';
+  document.getElementById('pname').textContent=p.name;
+  const db=document.getElementById('daily-badge');
+  db.style.display=isDaily?'inline-block':'none';
+  const pb=document.getElementById('par-badge');
+  pb.textContent=`Par: ${p.par}`;
+  pb.style.display='inline-block';
+  renderAll();
+}
+
+function setDiff(diff){
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`[data-d="${diff}"]`).classList.add('active');
+  loadPuzzle(diff,dailyIdx(diff),true);
+}
+
+// BOOT
+setDiff('easy');
+</script>
+</body>
+</html>
