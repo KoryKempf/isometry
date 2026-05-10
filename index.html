@@ -1741,7 +1741,7 @@ function updateBrainBanner(){
   if(!banner)return;
   const today=getTodayEastern();
   const hasSolvedAny=DIFF_ORDER.some(d=>loadResult(today,d));
-  const isSignedIn=typeof window.openDisplayNameModal==='function'&&document.getElementById('auth-header-btn')?.className.includes('signed-in');
+  const isSignedIn=document.getElementById('auth-header-btn')?.className.includes('signed-in');
   if(hasSolvedAny||isSignedIn){
     banner.classList.add('visible');
     if(text){
@@ -1966,6 +1966,8 @@ function updateAuthUI() {
     btn.textContent = 'Sign In';
     btn.className = 'auth-btn';
   }
+  // Re-evaluate banner now that auth state is known
+  updateBrainBanner();
 }
 
 // ══════════════════════════════════════════
