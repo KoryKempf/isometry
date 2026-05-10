@@ -1217,11 +1217,6 @@ function checkSolution(){
       window.gtrack('puzzle_solved',{difficulty:S.diff,moves:S.moves,time_seconds:e,par:S.puzzle.par,moves_over_par:S.moves-S.puzzle.par,is_daily:S.isDaily,puzzle_name:S.puzzle.name});
       if(navOffset===0){
         updateStreak();
-        const streak=getStreak();
-        if(typeof window.openAuthModal==='function'&&!document.getElementById('auth-header-btn')?.className.includes('signed-in')){
-          if(streak>=3){showSignupNudge('You\'ve played '+streak+' days in a row! Sign up so your streak is never lost.');}
-          else{showSignupNudge('Sign up free to save your results permanently and sync across devices.');}
-        }
       }
     } else {
       // Replay win — store replay stats separately so win screen can show both
