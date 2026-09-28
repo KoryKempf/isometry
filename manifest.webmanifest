@@ -1,0 +1,15 @@
+{
+  "name": "Isometry — daily spatial puzzle",
+  "short_name": "Isometry",
+  "description": "Rebuild a hidden 3D structure from its top, front and side views. Four new puzzles every day.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0B0B10",
+  "theme_color": "#0B0B10",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
