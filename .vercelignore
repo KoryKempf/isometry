@@ -1,0 +1,2 @@
+# Database migrations are applied to Supabase, not served with the site.
+supabase/
