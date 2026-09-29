@@ -1,5 +1,5 @@
 {
-  "name": "Isometry — daily spatial puzzle",
+  "name": "Isometry",
   "short_name": "Isometry",
   "description": "Rebuild a hidden 3D structure from its top, front and side views. Four new puzzles every day.",
   "start_url": "/?source=pwa",

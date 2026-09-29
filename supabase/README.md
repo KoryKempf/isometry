@@ -8,6 +8,8 @@
 | `harden_puzzle_access` | Removes the public insert policies on `daily_puzzles` and `puzzle_fingerprints`; puzzles become readable only once their day starts (US Eastern). |
 | `server_side_results` | Adds `daily_puzzles.name`, new result columns, and `submit_result()`, which checks a submitted build against the puzzle's views before saving it and advances streaks server-side. |
 | `rebalance_future_puzzles` | Backs up `daily_puzzles` to `backup.daily_puzzles_20260928`, schedules 12 hand-built Sunday puzzles (Medium), and re-orders every future day so Easy < Medium < Hard. |
+| `account_best_streak` | Adds `profiles.best_streak`; `submit_result()` keeps it and returns the account's streak. Adds `merge_guest_streak()` for carrying a signed-out streak into an account. |
+| `merge_guest_best_streak` | `merge_guest_streak()` also takes the signed-out best streak (capped at the number of puzzle days so far). |
 
 ## After deploying the new client
 
