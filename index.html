@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>ISOMETRY — A daily spatial reasoning puzzle</title>
+  <title>ISOMETRY: A daily spatial reasoning puzzle</title>
 
-  <meta name="description" content="Isometry is a free daily spatial reasoning puzzle. Rebuild a hidden 3D structure from its top, front and side views — then try to do it with the fewest cubes. Four new puzzles every day.">
+  <meta name="description" content="Isometry is a free daily spatial reasoning puzzle. Rebuild a hidden 3D structure from its top, front and side views, then try to do it with the fewest cubes. Four new puzzles every day.">
   <meta name="keywords" content="daily puzzle, spatial reasoning puzzle, 3D puzzle game, isometric puzzle, orthographic projection game, brain puzzle, logic puzzle, daily brain game, 3D thinking game, engineering puzzle, visual reasoning">
   <meta name="author" content="Isometry">
   <meta name="robots" content="index, follow">
@@ -29,13 +29,13 @@
     try{var c=localStorage.getItem('isometry-consent');if(c==='granted'||c==='denied')gtag('consent','update',{analytics_storage:c});}catch(e){}
     gtag('js',new Date());
     gtag('config','G-CW423CB8VK');
-    // Helper for game events — called throughout the game script
+    // Helper for game events, used throughout the game script
     window.gtrack=function(name,params){if(typeof gtag==='function')gtag('event',name,params||{});};
   </script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-CW423CB8VK"></script>
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="ISOMETRY — A Daily Spatial Reasoning Puzzle">
+  <meta property="og:title" content="ISOMETRY: A Daily Spatial Reasoning Puzzle">
   <meta property="og:description" content="Rebuild a hidden 3D structure from its top, front and side views. Four new puzzles every day. Can you do it with the fewest cubes?">
   <meta property="og:url" content="https://www.playisometry.com/">
   <meta property="og:site_name" content="Isometry">
@@ -43,8 +43,8 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ISOMETRY — A Daily Spatial Reasoning Puzzle">
-  <meta name="twitter:description" content="Rebuild a hidden 3D structure from three views. Free daily puzzle — four difficulty levels.">
+  <meta name="twitter:title" content="ISOMETRY: A Daily Spatial Reasoning Puzzle">
+  <meta name="twitter:description" content="Rebuild a hidden 3D structure from three views. A free daily puzzle with four difficulty levels.">
   <meta name="twitter:image" content="https://www.playisometry.com/og-image.png">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Isometry","description":"A free daily spatial reasoning puzzle.","url":"https://www.playisometry.com/","applicationCategory":"GameApplication","operatingSystem":"Web, iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"genre":["Puzzle","Brain Game","Spatial Reasoning"],"inLanguage":"en"}</script>
 
@@ -84,7 +84,7 @@
     .icon-btn:hover{background:var(--s2);color:var(--t1);}
     .icon-btn svg{width:20px;height:20px;flex-shrink:0;}
     .icon-btn:disabled{opacity:.35;background:none;}
-    .streak-btn{font-family:var(--num);font-size:16px;color:var(--t1);}
+    .streak{height:40px;padding:0 8px;display:inline-flex;align-items:center;gap:5px;font-family:var(--num);font-size:16px;color:var(--t1);cursor:default;user-select:none;}
     .account-btn{border:1px solid var(--line2);font-family:var(--ui);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-left:4px;max-width:150px;}
     .account-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .account-btn.signed-in{color:var(--ok-ink);border-color:var(--ok-soft);background:var(--ok-soft);text-transform:none;letter-spacing:0;font-size:13px;}
@@ -105,6 +105,8 @@
     .seg-mark{font-size:11px;font-style:normal;line-height:1;}
     .seg-mark.solved{color:var(--ok-ink);}
     .seg-mark.progress{color:var(--warn-ink);}
+    /* In-progress marker: a small amber dot */
+    .seg-mark.progress::before,.day.progress i::before,.dot{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warn-ink);vertical-align:middle;}
     .daterow{display:flex;align-items:center;gap:4px;min-height:40px;flex-wrap:wrap;}
     .date-btn{display:inline-flex;align-items:baseline;gap:8px;padding:6px 10px;border-radius:10px;font-family:var(--ui);font-weight:600;font-size:15px;color:var(--t1);}
     .date-btn:hover{background:var(--s2);}
@@ -152,12 +154,9 @@
     .view.matched .label{color:var(--ok-ink);}
     .status{margin-top:12px;font-size:14px;color:var(--t2);text-align:center;min-height:20px;}
     .status strong{color:var(--ok-ink);}
-    .legend{display:flex;justify-content:center;gap:14px;margin-top:8px;font-size:13px;color:var(--t3);flex-wrap:wrap;}
-    .legend span{display:inline-flex;align-items:center;gap:5px;}
-    .legend i{width:14px;height:14px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:10px;font-weight:700;color:#fff;}
 
     /* BUILD */
-    .counters{font-family:var(--num);font-size:14px;color:var(--t2);display:flex;gap:10px;align-items:center;}
+    .counters{font-family:var(--num);font-size:14px;color:var(--t2);display:flex;gap:14px;align-items:center;}
     .counters b{color:var(--t1);font-weight:400;}
     .layers{display:grid;gap:12px;grid-template-columns:repeat(3,minmax(0,1fr));}
     .layers.n4{grid-template-columns:repeat(2,minmax(0,1fr));max-width:400px;margin:0 auto;}
@@ -268,7 +267,8 @@
     .day.progress{background:var(--warn-soft);color:var(--warn-ink);}
     .day.off{background:transparent;opacity:.35;}
     .day.today{border:2px solid var(--accent);}
-    .cal-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--t2);margin-bottom:14px;}
+    .cal-legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--t2);margin-bottom:14px;}
+    .cal-legend .dot{margin-right:5px;}
     .classics{border-top:1px solid var(--line);padding-top:12px;}
     .classic-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
     .classic-grid button{border:1px solid var(--line2);border-radius:10px;padding:8px 10px;text-align:left;font-size:14px;}
@@ -288,6 +288,7 @@
     .tabs2 button{flex:1;height:40px;font-family:var(--ui);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--t2);border-bottom:2px solid transparent;margin-bottom:-1px;}
     .tabs2 button[aria-selected="true"]{color:var(--accent-ink);border-bottom-color:var(--accent-ink);}
     .form{display:flex;flex-direction:column;gap:12px;}
+    .modal h2 + .form{margin-top:14px;}
     .field{display:flex;flex-direction:column;gap:5px;}
     .field label{font-family:var(--ui);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);}
     .input{height:46px;border:1px solid var(--line2);border-radius:10px;background:var(--s2);font-size:16px;padding:0 12px;outline:none;}
@@ -339,7 +340,7 @@
       <svg viewBox="0 0 20 20" aria-hidden="true"><polygon points="10,1 18,5.5 10,10 2,5.5" fill="#9F7AEA"/><polygon points="2,5.5 10,10 10,19 2,14.5" fill="#6B46C1"/><polygon points="18,5.5 10,10 10,19 18,14.5" fill="#44337A"/></svg>
       <span>METRY</span>
     </a>
-    <button class="icon-btn streak-btn" id="streak-btn" type="button" aria-label="Streak: 0 days. Open statistics"><span aria-hidden="true">🔥</span><span id="streak-val">0</span></button>
+    <span class="streak" id="streak" hidden><span aria-hidden="true">🔥</span><span id="streak-val">0</span><span class="sr-only"> day streak</span></span>
     <button class="icon-btn" id="stats-btn" type="button" aria-label="Statistics"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 20V10h3v10H4zm6.5 0V4h3v16h-3zM17 20v-7h3v7h-3z"/></svg></button>
     <button class="icon-btn" id="help-btn" type="button" aria-label="How to play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 1c0 1.8-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg></button>
     <button class="icon-btn" id="theme-btn" type="button" aria-label="Switch to dark theme"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9A9 9 0 0 0 12 3zm0 16V5a7 7 0 0 1 0 14z"/></svg></button>
@@ -380,18 +381,13 @@
         <button class="switch" id="live-switch" type="button" role="switch" aria-checked="true"><span>Live feedback</span><span class="switch-track"><span class="switch-thumb"></span></span></button>
       </div>
       <div class="views" id="views"></div>
-      <div class="legend" id="legend">
-        <span><i style="background:var(--ok)">✓</i>covered</span>
-        <span><i style="background:var(--cube)"></i>still needed</span>
-        <span><i style="background:var(--err)">✕</i>extra</span>
-      </div>
       <p class="status" id="status" aria-live="polite"></p>
     </section>
 
     <section class="card build" aria-labelledby="build-title">
       <div class="card-head">
         <h2 id="build-title">Your build</h2>
-        <div class="counters"><span><b id="cube-count">0</b> cubes</span><span aria-hidden="true">·</span><span title="Fewest cubes possible">💎 perfect <b id="perfect-count">–</b></span></div>
+        <div class="counters"><span><b id="cube-count">0</b> cubes</span><span title="Fewest cubes possible">💎 perfect <b id="perfect-count"></b></span></div>
       </div>
       <p class="note" id="replay-note" hidden></p>
       <div class="layers" id="layers"></div>
@@ -468,7 +464,6 @@
   <div class="modal-box wide">
     <button class="icon-btn modal-x" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2 id="archive-title">Archive</h2>
-    <p class="sub">Every daily puzzle since #1. Pick a day to play it.</p>
     <div class="tabs" id="arch-tabs" role="group" aria-label="Difficulty"></div>
     <div class="cal-nav">
       <button class="icon-btn" id="cal-prev" type="button" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -476,7 +471,7 @@
       <button class="icon-btn" id="cal-next" type="button" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
     </div>
     <div class="cal" id="cal"></div>
-    <div class="cal-legend"><span>💎 Perfect</span><span>✓ Solved</span><span>• In progress</span></div>
+    <div class="cal-legend"><span>💎 Perfect</span><span>✓ Solved</span><span><i class="dot" aria-hidden="true"></i>In progress</span></div>
     <div class="classics">
       <button class="btn ghost small" type="button" id="classics-toggle" aria-expanded="false" style="width:100%">Classic puzzles ▾</button>
       <div id="classics" hidden></div>
@@ -517,6 +512,7 @@
       <li><span class="n">1</span><span>The three <b>target views</b> are silhouettes of a hidden structure, seen from the top, front and side.</span></li>
       <li><span class="n">2</span><span>Tap cells to place cubes. Each small grid is one <b>layer</b>, from the bottom up.</span></li>
       <li><span class="n">3</span><span>Match all three views to <b>solve</b> it. Use the fewest cubes possible for a <b>💎 Perfect</b>.</span></li>
+      <li><span class="n">4</span><span>With <b>live feedback</b> on, the views mark what you've covered (✓) and any extra shadows (✕).</span></li>
     </ol>
     <p class="fine" id="release-time">Four new puzzles every day.</p>
     <button class="btn primary" type="button" data-close style="width:100%">Play</button>
@@ -552,7 +548,7 @@
       <div class="field"><label for="su-password">Password</label><input class="input" type="password" id="su-password" placeholder="At least 8 characters" autocomplete="new-password" required></div>
       <p class="form-err" id="su-error" role="alert"></p>
       <button class="btn primary" type="submit" style="width:100%">Create account</button>
-      <p class="form-hint">By signing up you agree to our <a href="/terms.html">Terms</a>. Your results and streak sync across devices.</p>
+      <p class="form-hint">By signing up you agree to our <a href="/terms.html">Terms</a>.</p>
     </form>
   </div>
 </div>
@@ -561,7 +557,6 @@
   <div class="modal-box" style="max-width:380px;">
     <button class="icon-btn modal-x" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2 id="forgot-title">Reset password</h2>
-    <p class="sub">Enter your email and we'll send you a reset link.</p>
     <form class="form" id="forgot-form" novalidate>
       <div class="field"><label for="fp-email">Email</label><input class="input" type="email" id="fp-email" autocomplete="email" required></div>
       <p class="form-err" id="fp-error" role="alert"></p>
@@ -589,7 +584,7 @@
   <div class="modal-box" style="max-width:360px;">
     <button class="icon-btn modal-x" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2 id="name-title">Display name</h2>
-    <p class="sub">How you'll appear on leaderboards. 3–20 characters.</p>
+    <p class="sub">3 to 20 characters.</p>
     <form class="form" id="name-form" novalidate>
       <div class="field"><label for="dn-input" class="sr-only">Display name</label><input class="input" type="text" id="dn-input" maxlength="20" autocomplete="nickname" required></div>
       <p class="form-err" id="dn-error" role="alert"></p>
@@ -601,7 +596,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <div class="consent" id="consent" role="region" aria-label="Cookie consent" hidden>
-  <p>Can we use analytics cookies to count visits anonymously? It helps us improve the game. <a href="/privacy.html#cookies">Details</a></p>
+  <p>Can we use analytics cookies to count visits anonymously? <a href="/privacy.html#cookies">Details</a></p>
   <div><button class="btn small" type="button" id="consent-no">No thanks</button><button class="btn primary small" type="button" id="consent-yes">Allow</button></div>
 </div>
 
@@ -619,13 +614,17 @@ const $ = id => document.getElementById(id);
 const gtrack = (name,params) => { if (typeof window.gtrack === 'function') window.gtrack(name,params); };
 
 // ══════════════════════════════════════════
-// STORAGE — every access is guarded (private modes can throw)
+// STORAGE: every access is guarded (private modes can throw)
 // Keys:
-//   isometry-result-DATE-DIFF   = result (v2: {v:2,cubes,min,perfect,secs,time,hints,checks,assisted,noAssists,grid,...};
-//                                 older saves: {moves,time,par,placed,topView,ratio,name,diff,isDaily})
-//   isometry-progress-DATE-DIFF = in-progress build
-//   isometry-daily-DATE-DIFF    = cached puzzle
-//   isometry-streak-count / -date / -best, isometry-theme, isometry-live, isometry-htp-seen, isometry-consent
+//   isometry-result-DATE-DIFF        = result played signed out (v2: {v:2,cubes,min,perfect,secs,time,hints,checks,
+//                                      assisted,noAssists,grid,...}; older saves: {moves,time,par,placed,topView,...})
+//   isometry-streak-count / -date / -best = streak played signed out
+//   isometry-acct-result-DATE-DIFF   = the signed-in account's results, with synced: true once the server has them
+//   isometry-acct-streak-*, isometry-acct-owner = the account's streak, and whose cache this is
+//   isometry-claim-result-DATE-DIFF  = results waiting for their account to sign in again
+//   isometry-progress-DATE-DIFF      = in-progress build (shared)
+//   isometry-daily-DATE-DIFF         = cached puzzle (shared)
+//   isometry-store-v, isometry-theme, isometry-live, isometry-htp-seen, isometry-consent
 // ══════════════════════════════════════════
 const store = {
   get(k){ try { return localStorage.getItem(k); } catch(e) { return null; } },
@@ -636,7 +635,7 @@ const store = {
 function getJSON(k){ const s = store.get(k); if (!s) return null; try { return JSON.parse(s); } catch(e) { return null; } }
 
 // ══════════════════════════════════════════
-// DATES — the puzzle day follows US Eastern time
+// DATES: the puzzle day follows US Eastern time
 // ══════════════════════════════════════════
 const ET_FMT = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
 function etParts(d = new Date()){
@@ -682,7 +681,7 @@ function viewsOf(g,N){
 }
 
 // ══════════════════════════════════════════
-// SOLVER — exact fewest-cubes build (branch and bound over the three views)
+// SOLVER: exact fewest-cubes build (branch and bound over the three views)
 // View bitmasks: top bit y*N+x, front bit z*N+x, side bit z*N+y.
 // ══════════════════════════════════════════
 function popcount(v){ v = v-((v>>>1)&0x55555555); v = (v&0x33333333)+((v>>>2)&0x33333333); return (((v+(v>>>4))&0x0F0F0F0F)*0x01010101)>>>24; }
@@ -810,19 +809,36 @@ function infoFor(p){
 
 // ══════════════════════════════════════════
 // PERSISTENCE
+// Results and streaks belong to whoever is playing: this device's own while
+// signed out, or the signed-in account's. Builds in progress are shared.
 // ══════════════════════════════════════════
-const resultKey = (d,diff) => 'isometry-result-'+d+'-'+diff;
+const GUEST = 'isometry-', ACCT = 'isometry-acct-', CLAIM = 'isometry-claim-';
+let playerId = null;                       // signed-in account, or null for this device's own play
+const pfx = () => playerId ? ACCT : GUEST;
+const resultKey = (d,diff) => pfx()+'result-'+d+'-'+diff;
 const progressKey = (d,diff) => 'isometry-progress-'+d+'-'+diff;
+const RESULT_KEY = /^(isometry-(?:acct-|claim-)?)result-(\d{4}-\d{2}-\d{2})-(easy|medium|hard|expert)$/;
+function storedResults(prefix){
+  const out = [];
+  for (const key of store.keys()) {
+    const m = RESULT_KEY.exec(key);
+    if (!m || m[1] !== prefix) continue;
+    const r = getJSON(key);
+    if (r && typeof r === 'object') out.push({key, date:m[2], diff:m[3], r});
+  }
+  return out;
+}
 
 // Results from before scoring-by-cubes have {moves,par,placed,time}; read both shapes.
-function loadResult(date,diff){
-  const r = getJSON(resultKey(date,diff));
+function normResult(date,diff,r){
   if (!r || typeof r !== 'object') return null;
-  if (r.v === 2) return r;
+  if (r.v === 2 || r.v === 1) return r;
   const cubes = Number.isFinite(r.placed) ? r.placed : null;
-  return {v:1, date, diff, n:puzzleNo(date), cubes, min:null, perfect:null, secs:parseClock(r.time), time:r.time||'', hints:null, checks:null, noAssists:false, legacy:true};
+  return {v:1, date, diff, n:puzzleNo(date), cubes, min:null, perfect:null, secs:parseClock(r.time), time:r.time||'',
+    hints:null, checks:null, noAssists:false, moves:r.moves, legacy:true, synced:r.synced};
 }
-function saveResult(r){ store.set(resultKey(r.date,r.diff), JSON.stringify(r)); }
+function loadResult(date,diff){ return normResult(date,diff,getJSON(resultKey(date,diff))); }
+function saveResult(r){ store.set(resultKey(r.date,r.diff), JSON.stringify(playerId ? Object.assign({synced:false}, r) : r)); }
 function loadProgress(date,diff){ const p = getJSON(progressKey(date,diff)); return p && Array.isArray(p.user) ? p : null; }
 function clearProgress(date,diff){ store.del(progressKey(date,diff)); }
 // Perfect status for older results: work it out from the cached puzzle when we can.
@@ -840,31 +856,151 @@ function resolvePerfect(r){
 }
 
 // ── Streak: solving any of the day's puzzles on that day keeps it going ──
-function currentStreak(){
-  const cnt = parseInt(store.get('isometry-streak-count')||'0',10) || 0, last = store.get('isometry-streak-date') || '';
-  const t = todayET();
-  return (last === t || last === addDays(t,-1)) ? cnt : 0;
+function readStreak(prefix){
+  return {count:parseInt(store.get(prefix+'streak-count')||'0',10) || 0, last:store.get(prefix+'streak-date') || '',
+    best:parseInt(store.get(prefix+'streak-best')||'0',10) || 0};
 }
-function bestStreak(){ return Math.max(parseInt(store.get('isometry-streak-best')||'0',10) || 0, currentStreak()); }
+function running(s){ const t = todayET(); return (s.last === t || s.last === addDays(t,-1)) ? s.count : 0; }
+function currentStreak(){ return running(readStreak(pfx())); }
+function bestStreak(){ const s = readStreak(pfx()); return Math.max(s.best, running(s)); }
 function bumpStreak(day){
-  const cnt = parseInt(store.get('isometry-streak-count')||'0',10) || 0, last = store.get('isometry-streak-date') || '';
-  if (last >= day) return;
-  const next = last === addDays(day,-1) ? cnt+1 : 1;
-  store.set('isometry-streak-count', String(next));
-  store.set('isometry-streak-date', day);
-  if (next > bestStreak()) store.set('isometry-streak-best', String(next));
+  const p = pfx(), s = readStreak(p);
+  if (s.last >= day) return;
+  const next = s.last === addDays(day,-1) ? s.count+1 : 1;
+  store.set(p+'streak-count', String(next));
+  store.set(p+'streak-date', day);
+  if (next > s.best) store.set(p+'streak-best', String(next));
 }
-// Adopt a longer streak from the account (e.g. when signing in on a new device).
-window.adoptServerStreak = function(count,last){
-  if (!count || !last) return;
-  const t = todayET();
-  if (last !== t && last !== addDays(t,-1)) return;
-  if (count > currentStreak()) {
-    store.set('isometry-streak-count', String(count)); store.set('isometry-streak-date', last);
-    if (count > bestStreak()) store.set('isometry-streak-best', String(count));
-    renderHeader();
+const clearStreak = prefix => ['count','date','best'].forEach(k => store.del(prefix+'streak-'+k));
+
+// ── Account data on this device ──
+// The signed-in account, read from the auth library's saved session.
+function storedUserId(){
+  const s = getJSON('sb-isometry-auth');
+  if (!s || typeof s.access_token !== 'string' || !s.refresh_token) return null;
+  try {
+    const c = JSON.parse(atob(s.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    return c && typeof c.sub === 'string' && c.sub ? c.sub : null;
+  } catch(e) { return null; }
+}
+const ownsCache = uid => !!uid && store.get(ACCT+'owner') === uid;
+// Clear the account cache. Results the server hasn't got yet wait under CLAIM
+// until that account signs in here again.
+function dropAccountCache(){
+  const owner = store.get(ACCT+'owner');
+  for (const e of storedResults(ACCT)) {
+    if (owner && e.r.synced !== true) store.set(CLAIM+'result-'+e.date+'-'+e.diff, JSON.stringify(Object.assign({}, e.r, {owner})));
+    store.del(e.key);
   }
-};
+  clearStreak(ACCT);
+  store.del(ACCT+'owner');
+}
+function useAccount(uid){ if (!ownsCache(uid)) { dropAccountCache(); store.set(ACCT+'owner', uid); } }
+function setPlayer(uid){
+  uid = uid || null;
+  if (uid) useAccount(uid);
+  if (uid === playerId) return false;
+  playerId = uid;
+  return true;
+}
+// On signing in, results played signed out here (and ones this account left
+// waiting) move into the account and upload from there.
+function adoptLocal(uid){
+  useAccount(uid);
+  let moved = 0;
+  const take = e => {
+    const k = ACCT+'result-'+e.date+'-'+e.diff;
+    if (!store.get(k)) { const r = Object.assign({}, e.r, {synced:false}); delete r.owner; store.set(k, JSON.stringify(r)); moved++; }
+    store.del(e.key);
+  };
+  storedResults(GUEST).forEach(take);
+  storedResults(CLAIM).filter(e => !e.r.owner || e.r.owner === uid).forEach(take);
+  return moved;
+}
+function forUpload(e){
+  const r = normResult(e.date,e.diff,e.r);
+  return r.v === 2 ? Object.assign({}, r, {date:e.date, diff:e.diff}) : {v:1, date:e.date, diff:e.diff, secs:r.secs, moves:r.moves||0, cubes:r.cubes};
+}
+function pendingUploads(uid){ return ownsCache(uid) ? storedResults(ACCT).filter(e => e.r.synced !== true).map(forUpload) : []; }
+function markSynced(uid,date,diff){
+  if (!ownsCache(uid)) return;
+  const k = ACCT+'result-'+date+'-'+diff, r = getJSON(k);
+  if (r && r.synced !== true) { r.synced = true; store.set(k, JSON.stringify(r)); }
+}
+function fromServer(row){
+  const r = {date:row.date, diff:row.difficulty, n:puzzleNo(row.date), cubes:Number.isFinite(row.placed) ? row.placed : null,
+    secs:row.time_seconds || parseClock(row.time_display), moves:row.moves, synced:true};
+  r.time = row.time_display || fmtClock(r.secs);
+  if (typeof row.grid === 'string' && row.grid) return Object.assign(r, {v:2, min:row.min_cubes, perfect:row.min_cubes != null && r.cubes === row.min_cubes,
+    hints:row.hints, checks:row.checks, assisted:row.assisted, noAssists:row.assisted === false && row.hints === 0 && row.checks === 1, grid:row.grid});
+  return Object.assign(r, {v:1, min:null, perfect:null, hints:null, checks:null, noAssists:false, legacy:true});
+}
+// The server's rows are the account's record and replace anything not yet confirmed here.
+function applyServerRows(uid,rows){
+  if (!ownsCache(uid) || !Array.isArray(rows)) return 0;
+  let n = 0;
+  for (const row of rows) {
+    if (!row || !/^\d{4}-\d{2}-\d{2}$/.test(row.date) || !DIFFS.includes(row.difficulty)) continue;
+    const k = ACCT+'result-'+row.date+'-'+row.difficulty, cur = getJSON(k);
+    if (cur && cur.synced === true) continue;
+    store.set(k, JSON.stringify(fromServer(row)));
+    n++;
+  }
+  return n;
+}
+function setAccountStreak(uid,count,last,best){
+  if (!ownsCache(uid)) return;
+  count = Math.max(0, parseInt(count,10) || 0);
+  store.set(ACCT+'streak-count', String(count));
+  store.set(ACCT+'streak-date', typeof last === 'string' ? last : '');
+  store.set(ACCT+'streak-best', String(Math.max(parseInt(best,10) || 0, count)));
+  if (playerId === uid) renderHeader();
+}
+// The signed-out streak (or one left waiting by the split below), for merging into the account.
+function guestStreak(){
+  const a = readStreak(GUEST), b = readStreak(CLAIM), s = running(b) > running(a) ? b : a;
+  const best = Math.max(a.best, b.best, running(a), running(b));
+  return s.count || best ? {count:s.count, last:s.last, best} : null;
+}
+function clearGuestStreak(){ clearStreak(GUEST); clearStreak(CLAIM); }
+
+// One-time split (Sept 2026). Earlier versions kept the account's results in the
+// same keys as the device's own, so they still showed after signing out.
+function separateAccountData(){
+  if (store.get('isometry-store-v') === '2') return;
+  const uid = storedUserId(), local = storedResults(GUEST);
+  // Copies pulled down from an account lack the fields this device adds when saving
+  // (`at` now; `topView` in every version since April 17).
+  const copied = e => e.r.v === 2 ? !e.r.at : (!e.r.topView && e.date > '2026-04-17');
+  if (uid) {
+    store.set(ACCT+'owner', uid);
+    for (const e of local) {
+      store.set(ACCT+'result-'+e.date+'-'+e.diff, JSON.stringify(Object.assign({}, e.r, {synced:copied(e)})));
+      store.del(e.key);
+    }
+    // Shown until the server answers. The streak itself stays put to be merged after sign-in,
+    // since it may have kept going here while the account's stood still.
+    const s = readStreak(GUEST);
+    if (s.count || s.best) {
+      store.set(ACCT+'streak-count', String(s.count)); store.set(ACCT+'streak-date', s.last);
+      store.set(ACCT+'streak-best', String(Math.max(s.best, s.count)));
+    }
+  } else if (local.some(copied)) {
+    // Signed out with an account's results mixed in: the copies are on the server already,
+    // and what was played here (streak included) waits for the next sign-in.
+    for (const e of local) {
+      if (!copied(e)) store.set(CLAIM+'result-'+e.date+'-'+e.diff, JSON.stringify(e.r));
+      store.del(e.key);
+    }
+    const s = readStreak(GUEST);
+    if (s.count || s.best) {
+      store.set(CLAIM+'streak-count', String(s.count)); store.set(CLAIM+'streak-date', s.last);
+      store.set(CLAIM+'streak-best', String(s.best));
+    }
+    clearStreak(GUEST);
+  }
+  store.set('isometry-store-v', '2');
+}
 
 // ══════════════════════════════════════════
 // STATE
@@ -901,19 +1037,20 @@ function stateFor(p){
 const attempt = () => ST.replay || ST;
 const editable = () => !!P && (!!ST.replay || !ST.done);
 
+function saveProgress(p,st){
+  if (!p.isDaily || st.done) return;
+  store.set(progressKey(p.date,p.diff), JSON.stringify({v:2, user:st.user, moves:st.moves, elapsed:elapsedOf(st),
+    checks:st.checks, hints:st.hints, assisted:st.assisted, date:p.date, diff:p.diff}));
+}
 let saveTimer = null;
 function scheduleSave(){
   clearTimeout(saveTimer);
   const p = P, st = ST;
-  saveTimer = setTimeout(() => {
-    if (!p.isDaily || st.done) return;
-    store.set(progressKey(p.date,p.diff), JSON.stringify({v:2, user:st.user, moves:st.moves, elapsed:elapsedOf(st),
-      checks:st.checks, hints:st.hints, assisted:st.assisted, date:p.date, diff:p.diff}));
-  }, 400);
+  saveTimer = setTimeout(() => { saveProgress(p,st); renderBar(); }, 400);
 }
 
 // ══════════════════════════════════════════
-// TIMER — runs while a puzzle is in progress and the page is visible
+// TIMER: runs while a puzzle is in progress and the page is visible
 // ══════════════════════════════════════════
 function elapsedOf(a){ return a.elapsed + (a.t0 ? Math.floor((Date.now()-a.t0)/1000) : 0); }
 function startTimer(){ const a = attempt(); if (!a.t0 && editable()) a.t0 = Date.now(); }
@@ -944,7 +1081,7 @@ async function openDaily(diff,date){
   const p = await fetchDaily(date,diff);
   if (seq !== loadSeq) return;
   if (!p) {
-    toast(date === todayET() ? "Couldn't load today's puzzle — playing a classic instead. Check your connection." : "Couldn't load that puzzle.");
+    toast(date === todayET() ? "Couldn't load today's puzzle, so here's a classic one." : "Couldn't load that puzzle.");
     if (date !== todayET() && P) { view.date = P.date || todayET(); renderBar(); return; }
     return activate(classicPuzzle(diff, (puzzleNo(todayET())) % CLASSICS[diff].length));
   }
@@ -964,22 +1101,43 @@ function activate(p){
   buildBoard();
   renderAll();
 }
-// Results pulled from the account (e.g. solved on another device) show up without a reload.
-window.onResultsSynced = function(){
+// Results that changed underneath the page (signing in, or solved on another device) show up without a reload.
+function refreshResults(){
+  const differs = (st,r) => r ? !st.done || st.result.cubes !== r.cubes || st.result.secs !== r.secs : st.done;
   for (const [k,st] of sessions) {
     const m = /^d\|(.+)\|(.+)$/.exec(k);
-    if (m && !st.done && (!P || k !== P.key) && loadResult(m[1],m[2])) sessions.delete(k);
+    if (m && (!P || k !== P.key) && differs(st, loadResult(m[1],m[2]))) sessions.delete(k);
   }
-  if (P && P.isDaily && !ST.done) {
+  if (P && P.isDaily && !ST.replay) {
     const r = loadResult(P.date,P.diff);
-    if (r) {
+    if (r && differs(ST,r)) {
       pauseTimer(ST); ST.done = true; ST.result = resolvePerfect(r); ST.hint = null;
       if (typeof r.grid === 'string' && r.grid.length === P.N**3) ST.user = stringToGrid(r.grid,P.N);
       clearProgress(P.date,P.diff);
     }
   }
   if (P) renderAll();
-};
+}
+// Switch between the account's results and this device's own.
+function reloadForPlayer(){
+  clearTimeout(saveTimer);
+  if (P && ST) {
+    pauseTimer(ST);
+    if (ST.moves || ST.hints || ST.checks) saveProgress(P,ST);
+  }
+  for (const k of [...sessions.keys()]) if (k.startsWith('d|')) sessions.delete(k);
+  ['m-results','m-confirm','m-stats','m-archive'].forEach(closeModal);
+  if (P) activate(P); else renderHeader();
+}
+function accountReady(uid){
+  const moved = adoptLocal(uid);
+  if (setPlayer(uid)) reloadForPlayer();
+  else if (moved) refreshResults();
+}
+function signedOut(){
+  dropAccountCache();
+  if (setPlayer(null)) reloadForPlayer();
+}
 function goDay(delta){
   const t = todayET(), d = addDays(view.date, delta);
   if (d < EPOCH || d > t) return;
@@ -1103,7 +1261,7 @@ function clearBuild(){
 function useHint(){
   if (!editable()) return;
   const a = attempt(), h = computeHint(a.user);
-  if (h.type === 'done') { setStatus('Already perfect — press <strong>Check</strong>.'); return; }
+  if (h.type === 'done') { setStatus('Already perfect. Press <strong>Check</strong>.'); return; }
   a.hint = h; a.hints++;
   gtrack('hint_used',{difficulty:P.diff, is_daily:P.isDaily, kind:h.type});
   renderBoard();
@@ -1116,7 +1274,7 @@ function computeHint(user){
   for (let z = 0; z < N; z++) for (let y = 0; y < N; y++) for (let x = 0; x < N; x++)
     if (user[z][y][x]) mine.push({z,y,x,i:(z*N+y)*N+x});
   const bad = mine.find(c => !info.inC.has(c.i));
-  if (bad) return {type:'remove', z:bad.z, y:bad.y, x:bad.x, msg:"This cube can't be part of any solution — it casts a shadow that none of the views have."};
+  if (bad) return {type:'remove', z:bad.z, y:bad.y, x:bad.x, msg:"This cube can't be part of any solution."};
   const cv = coverage(user), prefer = new Set(mine.map(c => c.i));
   const plan = minCover(info,0,0,0,prefer).cells;
   if (!cv.match) {
@@ -1127,10 +1285,10 @@ function computeHint(user){
     for (const c of mine) {
       let t = 0, f = 0, s = 0;
       for (const d of mine) if (d !== c) { t |= 1<<(d.y*N+d.x); f |= 1<<(d.z*N+d.x); s |= 1<<(d.z*N+d.y); }
-      if (t === info.T && f === info.F && s === info.S) return {type:'remove', z:c.z, y:c.y, x:c.x, msg:"This cube isn't needed — every view still matches without it."};
+      if (t === info.T && f === info.F && s === info.S) return {type:'remove', z:c.z, y:c.y, x:c.x, msg:"This cube isn't needed."};
     }
     const keep = new Set(plan.map(c => c.i)), rm = mine.find(c => !keep.has(c.i));
-    if (rm) return {type:'remove', z:rm.z, y:rm.y, x:rm.x, msg:"A perfect build doesn't use this cube. Remove it and rebuild around the gap."};
+    if (rm) return {type:'remove', z:rm.z, y:rm.y, x:rm.x, msg:"A perfect build doesn't use this cube."};
   }
   return {type:'done'};
 }
@@ -1142,14 +1300,14 @@ function check(){
   if (liveOn) a.assisted = true;
   if (!cv.match) {
     const off = ['top','front','side'].filter(v => !cv[v]).map(v => v[0].toUpperCase()+v.slice(1));
-    setStatus(cubes ? 'Not quite — '+listWords(off)+' '+(off.length > 1 ? "don't" : "doesn't")+' match yet.' : 'Place some cubes first.');
+    setStatus(cubes ? 'Not quite. '+listWords(off)+' '+(off.length > 1 ? "don't" : "doesn't")+' match yet.' : 'Place some cubes first.');
     gtrack('puzzle_failed',{difficulty:P.diff, is_daily:P.isDaily, cubes});
     if (!ST.replay) scheduleSave();
     return;
   }
   if (ST.replay) return finishReplay();
   if (cubes > INFO.min) {
-    $('confirm-msg').textContent = 'You used '+cubes+' cubes. A perfect build uses '+INFO.min+'. Submit now, or keep going and try to trim it down?';
+    $('confirm-msg').textContent = 'You used '+cubes+' cubes. A perfect build uses '+INFO.min+'.';
     $('confirm-submit').textContent = 'Submit '+cubes+' cubes';
     openModal('m-confirm');
     return;
@@ -1172,7 +1330,7 @@ function submit(){
     const t = todayET();
     // Count the streak for the puzzle's own day (so a solve just after midnight still counts).
     if (P.date === t || P.date === addDays(t,-1)) bumpStreak(P.date);
-    if (window.ISOAuth) window.ISOAuth.submitResult(r);
+    if (playerId && window.ISOAuth) window.ISOAuth.submitResult(r);
   }
   gtrack('puzzle_solved',{difficulty:P.diff, cubes, min:INFO.min, perfect:r.perfect, hints:a.hints, checks:a.checks,
     assisted:a.assisted, time_seconds:secs, is_daily:P.isDaily, puzzle_number:r.n});
@@ -1204,8 +1362,9 @@ function renderAll(){ renderHeader(); renderBar(); renderBoard(); renderTimer();
 
 function renderHeader(){
   const s = currentStreak();
+  $('streak').hidden = !s;
+  $('streak').title = s+' day streak';
   $('streak-val').textContent = s;
-  $('streak-btn').setAttribute('aria-label','Streak: '+s+(s === 1 ? ' day' : ' days')+'. Open statistics');
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
   $('theme-btn').setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
 }
@@ -1220,15 +1379,15 @@ function renderBar(){
     if (r) resolvePerfect(r);
     const mark = b.querySelector('.seg-mark');
     mark.className = 'seg-mark' + (r ? ' solved' : pr ? ' progress' : '');
-    mark.textContent = r ? (r.perfect ? '💎' : '✓') : pr ? '•' : '';
+    mark.textContent = r ? (r.perfect ? '💎' : '✓') : '';
     b.setAttribute('aria-label', DIFF_LABEL[d] + (r ? (r.perfect ? ', perfect' : ', solved') : pr ? ', in progress' : ''));
   });
   const classic = view.classic != null && P && !P.isDaily;
   $('prev-day').hidden = $('next-day').hidden = $('date-btn').hidden = classic;
   $('classic-chip').hidden = !classic;
-  if (classic) { $('classic-chip').textContent = 'Classic · '+P.name; }
-  $('date-label').textContent = view.date === t ? 'Today · '+fmtDate(view.date,{weekday:undefined}) : fmtDate(view.date,{year:view.date.slice(0,4) === t.slice(0,4) ? undefined : 'numeric'});
-  $('pno').textContent = '#'+puzzleNo(view.date) + (view.diff === 'expert' ? ' · 4×4×4' : '');
+  if (classic) { $('classic-chip').textContent = 'Classic: '+P.name; }
+  $('date-label').textContent = view.date === t ? 'Today, '+fmtDate(view.date,{weekday:undefined}) : fmtDate(view.date,{year:view.date.slice(0,4) === t.slice(0,4) ? undefined : 'numeric'});
+  $('pno').textContent = '#'+puzzleNo(view.date);
   $('prev-day').disabled = view.date <= EPOCH;
   $('next-day').disabled = view.date >= t;
   $('today-btn').hidden = classic ? false : view.date === t;
@@ -1256,16 +1415,12 @@ function renderBoard(){
     box.querySelector('.vcheck').textContent = matched ? '✓ ' : '';
     box.querySelector('.vgrid').setAttribute('aria-label', box.dataset.name+' view, '+N+' by '+N+'. Filled: '+(filled.join('; ')||'none')+'.'+(liveOn && ed ? (cv[k] ? ' Your build matches it.' : ' Your build does not match it yet.') : ''));
   });
-  $('legend').hidden = !(liveOn && ed);
   $('live-switch').setAttribute('aria-checked', liveOn ? 'true' : 'false');
 
   // Status line
   const st = $('status');
   if (st.dataset.msg) st.innerHTML = st.dataset.msg;
-  else if (!ed) st.textContent = '';
-  else if (!cubes) st.textContent = liveOn ? 'Tap cells in the layers below to start building.' : 'Live feedback is off — you’re on your own. 🧠';
-  else if (liveOn) st.innerHTML = cv.match ? '<strong>All three views match!</strong> Press Check — or trim cubes first.' : (['top','front','side'].filter(v => cv[v]).length)+' of 3 views match.';
-  else st.textContent = 'Press Check when you think it matches.';
+  else st.innerHTML = ed && liveOn && cubes && cv.match ? '<strong>All three views match!</strong>' : '';
 
   // Layers
   const h = ed ? a.hint : null;
@@ -1287,7 +1442,7 @@ function renderBoard(){
   const note = $('replay-note');
   if (ST.replay && ST.result) {
     note.hidden = false;
-    note.innerHTML = 'Replay for fun — your result: '+resultLine(ST.result)+' <button class="linklike" type="button" id="end-replay">Back to my build</button>';
+    note.innerHTML = 'Replaying. Your result: '+resultLine(ST.result)+' <button class="linklike" type="button" id="end-replay">Back to my build</button>';
     $('end-replay').onclick = endReplay;
   } else note.hidden = true;
   const showSolved = !ST.replay && ST.done && ST.result;
@@ -1301,14 +1456,15 @@ function renderBoard(){
 }
 function resultLine(r,short){
   const bits = [];
-  if (r.cubes != null) bits.push(r.cubes+' cubes'+(!r.perfect && r.min ? ' (💎 '+r.min+')' : ''));
-  if (r.time) bits.push(r.time);
-  return (short ? '' : (r.perfect ? '💎 ' : '✅ ')) + bits.join(' · ');
+  if (r.cubes != null) bits.push(r.cubes+(r.cubes === 1 ? ' cube' : ' cubes'));
+  else if (!short) bits.push('Solved');
+  if (r.time) bits.push((bits.length ? 'in ' : '')+r.time);
+  return (short ? '' : (r.perfect ? '💎 ' : '✅ ')) + bits.join(' ');
 }
 function setStatus(html){ const s = $('status'); s.dataset.msg = html; s.innerHTML = html; }
 
 // ══════════════════════════════════════════
-// 3D PREVIEW — painter's algorithm: cubes nearer the viewer (larger x+y+z) draw last
+// 3D PREVIEW: painter's algorithm, so cubes nearer the viewer (larger x+y+z) draw last
 // ══════════════════════════════════════════
 function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 function drawIso(canvas,grid,N,opts = {}){
@@ -1360,7 +1516,7 @@ let resizeT = null;
 window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(renderPreview, 80); });
 
 // ══════════════════════════════════════════
-// MODALS — Esc closes, focus is trapped inside and restored afterwards
+// MODALS: Esc closes, focus is trapped inside and restored afterwards
 // ══════════════════════════════════════════
 const modalStack = [];
 function focusables(el){ return [...el.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(n => !n.closest('[hidden]') && n.offsetParent !== null); }
@@ -1395,7 +1551,9 @@ document.addEventListener('keydown', e => {
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 });
-window.ISO = {openModal, closeModal};
+// Used by the auth module below.
+window.ISO = {openModal, closeModal, accountReady, signedOut, pendingUploads, markSynced, applyServerRows,
+  setAccountStreak, guestStreak, clearGuestStreak, refresh:refreshResults};
 
 let toastT = null;
 function toast(msg){ const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200); }
@@ -1424,21 +1582,18 @@ function openResults(){
   else if (perfect) head = 'Perfect build!';
   else if (r.min != null && r.cubes - r.min === 1) head = 'So close!';
   else head = 'Solved!';
-  const title = P.isDaily ? '#'+P.number+' · '+DIFF_LABEL[P.diff]+' · '+fmtDate(P.date) : 'Classic · '+esc(P.name);
+  const title = P.isDaily ? DIFF_LABEL[P.diff]+' #'+P.number+'<br>'+fmtDate(P.date,{weekday:'long',month:'long'}) : 'Classic: '+esc(P.name);
   let html = '<div class="res-head"><span class="res-badge" aria-hidden="true">'+(perfect ? '💎' : '✅')+'</span>'
     + '<h2 id="res-title" class="'+(perfect ? 'perfect' : 'solved')+'">'+head+'</h2><div class="sub" style="margin:0">'+title+'</div></div>';
-  html += '<div class="tiles"><div class="tile"><div class="tile-v">'+(r.cubes ?? '–')+'</div><div class="tile-l">Cubes</div></div>'
-    + '<div class="tile"><div class="tile-v">'+(r.min ?? INFO.min)+'</div><div class="tile-l">Perfect</div></div>'
-    + '<div class="tile"><div class="tile-v">'+esc(r.time || '–')+'</div><div class="tile-l">Time</div></div></div>';
-  const notes = [];
-  if (replay && ST.result) notes.push('Your official result: <b>'+resultLine(ST.result)+'</b>');
-  else {
-    if (r.noAssists) notes.push('<span class="badge">🧠 No assists</span>');
-    else if (r.hints) notes.push(r.hints+(r.hints === 1 ? ' hint' : ' hints')+' used');
-    if (!perfect && r.min != null && r.cubes != null) notes.push('A perfect build uses <b>'+r.min+'</b> cubes — replay to find it.');
-  }
-  if (notes.length) html += '<p class="res-note">'+notes.join(' · ')+'</p>';
-  if (!replay && P.special) html += '<div class="reveal"><canvas id="reveal-canvas" aria-hidden="true"></canvas><p>This puzzle was built from<b>'+esc(P.special)+'</b></p></div>';
+  const tiles = [[r.cubes,'Cubes'],[r.min ?? INFO.min,'Perfect'],[r.time,'Time']].filter(t => t[0] != null && t[0] !== '');
+  html += '<div class="tiles" style="grid-template-columns:repeat('+tiles.length+',1fr)">'
+    + tiles.map(t => '<div class="tile"><div class="tile-v">'+esc(t[0])+'</div><div class="tile-l">'+t[1]+'</div></div>').join('') + '</div>';
+  let note = '';
+  if (replay && ST.result) note = 'Your result: <b>'+resultLine(ST.result)+'</b>';
+  else if (r.noAssists) note = '<span class="badge">🧠 No assists</span>';
+  else if (r.hints) note = r.hints+(r.hints === 1 ? ' hint' : ' hints')+' used';
+  if (note) html += '<p class="res-note">'+note+'</p>';
+  if (!replay && P.special) html += '<div class="reveal"><canvas id="reveal-canvas" aria-hidden="true"></canvas><p>You built<b>'+esc(P.special)+'</b></p></div>';
   if (!replay) {
     html += '<button class="btn primary share-main" type="button" id="share-btn">Share result</button>'
       + '<div class="share-row"><button class="btn ghost" type="button" id="share-copy">Copy</button><button class="btn ghost" type="button" id="share-x">X</button><button class="btn ghost" type="button" id="share-fb">Facebook</button>'
@@ -1457,7 +1612,7 @@ function openResults(){
   html += '<div class="modal-actions">'+(replay ? '<button class="btn" type="button" id="res-replay">Replay again</button><button class="btn" type="button" id="res-end-replay">Back to my build</button>' : '<button class="btn" type="button" id="res-replay">Replay</button><button class="btn" type="button" id="res-archive">Archive</button>')+'</div>';
   $('res-body').innerHTML = html;
   const bind = (id,fn) => { const el = $(id); if (el) el.onclick = fn; };
-  bind('share-btn', shareResult); bind('share-copy', () => copyText(shareText(), 'Copied — paste it anywhere.', 'copy'));
+  bind('share-btn', shareResult); bind('share-copy', () => copyText(shareText(), 'Copied.', 'copy'));
   bind('share-x', shareX); bind('share-fb', shareFacebook); bind('share-sms', shareSMS);
   bind('res-replay', playAgain); bind('res-end-replay', () => { closeModal('m-results'); endReplay(); });
   bind('res-archive', () => { closeModal('m-results'); openArchive(); });
@@ -1470,21 +1625,19 @@ function openResults(){
 
 function shareText(){
   const r = resolvePerfect(ST.result), lines = [];
-  lines.push(P.isDaily ? 'ISOMETRY #'+P.number+' · '+DIFF_LABEL[P.diff] : 'ISOMETRY Classic · '+P.name);
-  if (r.perfect) lines.push('💎 Perfect · '+r.cubes+' cubes · ⏱ '+r.time);
-  else lines.push('✅ Solved · '+(r.cubes != null ? r.cubes+' cubes'+(r.min != null ? ' (💎 '+r.min+')' : '')+' · ' : '')+'⏱ '+r.time);
-  const extra = [];
-  if (r.noAssists) extra.push('🧠 No assists');
-  else if (r.hints) extra.push('💡 '+r.hints+(r.hints === 1 ? ' hint' : ' hints'));
-  const s = currentStreak(); if (s > 1 && P.isDaily && P.date === todayET()) extra.push('🔥 '+s);
-  if (extra.length) lines.push(extra.join(' · '));
+  lines.push(P.isDaily ? 'Isometry #'+P.number+' ('+DIFF_LABEL[P.diff]+')' : 'Isometry Classic: '+P.name);
+  if (r.perfect) lines.push('💎 Perfect in '+r.time);
+  else lines.push('✅ '+(r.cubes != null ? r.cubes+' cubes in ' : 'Solved in ')+r.time+(r.min != null && r.cubes != null ? ' (perfect is '+r.min+')' : ''));
+  if (r.noAssists) lines.push('🧠 No assists');
+  else if (r.hints) lines.push('💡 '+r.hints+(r.hints === 1 ? ' hint' : ' hints'));
+  const s = currentStreak(); if (s > 1 && P.isDaily && P.date === todayET()) lines.push('🔥 '+s+' day streak');
   lines.push('playisometry.com');
   return lines.join('\n');
 }
 function copyText(text,msg,method){
   if (method) gtrack('share_clicked',{method});
   const done = () => toast(msg);
-  const fallback = () => { try { const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly',''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); } catch(e) { toast("Couldn't copy — select the text manually."); } };
+  const fallback = () => { try { const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly',''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); } catch(e) { toast("Couldn't copy."); } };
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
 }
 function shareResult(){
@@ -1492,11 +1645,11 @@ function shareResult(){
   if (navigator.share && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
     gtrack('share_clicked',{method:'native'});
     navigator.share({text}).catch(() => {});
-  } else copyText(text, 'Result copied — paste it anywhere.', 'copy');
+  } else copyText(text, 'Copied.', 'copy');
 }
 function shareX(){ gtrack('share_clicked',{method:'x'}); window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText()),'_blank','noopener'); }
 function shareFacebook(){
-  copyText(shareText(), 'Result copied — paste it into your post.', 'facebook');
+  copyText(shareText(), 'Copied. Paste it into your post.', 'facebook');
   window.open('https://www.facebook.com/sharer.php?u='+encodeURIComponent('https://www.playisometry.com'),'_blank','noopener,width=600,height=500');
 }
 function shareSMS(){ gtrack('share_clicked',{method:'sms'}); window.location.href = 'sms:?&body='+encodeURIComponent(shareText()); }
@@ -1504,25 +1657,19 @@ function shareSMS(){ gtrack('share_clicked',{method:'sms'}); window.location.hre
 // ══════════════════════════════════════════
 // STATS
 // ══════════════════════════════════════════
-function allResults(){
-  const out = [];
-  for (const k of store.keys()) {
-    const m = /^isometry-result-(\d{4}-\d{2}-\d{2})-(easy|medium|hard|expert)$/.exec(k);
-    if (!m) continue;
-    const r = loadResult(m[1],m[2]); if (r) out.push(resolvePerfect(r));
-  }
-  return out;
-}
+// Only the current player's results: the account's while signed in, this device's own otherwise.
+function allResults(){ return storedResults(pfx()).map(e => normResult(e.date,e.diff,e.r)).filter(Boolean).map(resolvePerfect); }
 function openStats(){
-  gtrack('stats_opened',{});
-  const res = allResults(), days = new Set(res.map(r => r.date));
-  const perfect = res.filter(r => r.perfect).length;
-  let html = '<div class="tiles four">'
-    + '<div class="tile"><div class="tile-v">'+res.length+'</div><div class="tile-l">Solved</div></div>'
-    + '<div class="tile"><div class="tile-v">'+(res.length ? Math.round(perfect*100/res.length) : 0)+'%</div><div class="tile-l">Perfect</div></div>'
-    + '<div class="tile"><div class="tile-v">'+currentStreak()+'</div><div class="tile-l">Streak</div></div>'
-    + '<div class="tile"><div class="tile-v">'+bestStreak()+'</div><div class="tile-l">Best</div></div></div>';
-  html += '<p class="res-note">'+days.size+(days.size === 1 ? ' day' : ' days')+' played. Your streak grows when you solve any puzzle on its day.</p>';
+  gtrack('stats_opened',{signed_in:!!playerId});
+  renderStats();
+  openModal('m-stats');
+  resolveOlderResults();
+}
+function renderStats(){
+  const res = allResults(), known = res.filter(r => r.perfect != null), perfect = known.filter(r => r.perfect).length;
+  const tile = (v,l) => '<div class="tile"><div class="tile-v">'+v+'</div><div class="tile-l">'+l+'</div></div>';
+  let html = '<div class="tiles four">' + tile(res.length,'Solved') + tile((known.length ? Math.round(perfect*100/known.length) : 0)+'%','Perfect')
+    + tile(currentStreak(),'Streak') + tile(bestStreak(),'Best') + '</div>';
   const scored = res.filter(r => r.min != null && r.cubes != null);
   if (scored.length) {
     const buckets = [0,0,0,0];
@@ -1533,14 +1680,31 @@ function openStats(){
   }
   html += '<table class="by-diff"><thead><tr><th scope="col">Level</th><th scope="col">Solved</th><th scope="col">💎</th><th scope="col">Best time</th></tr></thead><tbody>'
     + DIFFS.map(d => { const rs = res.filter(r => r.diff === d), best = rs.filter(r => r.secs > 0).reduce((m,r) => Math.min(m,r.secs), Infinity);
-      return '<tr><td>'+DIFF_LABEL[d]+'</td><td>'+rs.length+'</td><td>'+rs.filter(r => r.perfect).length+'</td><td>'+(best < Infinity ? fmtClock(best) : '–')+'</td></tr>'; }).join('')
+      return '<tr><td>'+DIFF_LABEL[d]+'</td><td>'+rs.length+'</td><td>'+rs.filter(r => r.perfect).length+'</td><td>'+(best < Infinity ? fmtClock(best) : '')+'</td></tr>'; }).join('')
     + '</tbody></table>';
   html += '<p class="countdown">Next puzzles in<b data-countdown></b></p>';
-  if (!(window.ISOAuth && window.ISOAuth.user())) html += '<p class="nudge"><button type="button" id="stats-signup">Create a free account</button> to keep these stats on every device.</p>';
+  if (!playerId) html += '<p class="nudge"><button type="button" id="stats-signup">Create a free account</button> to keep these stats on every device.</p>';
   $('stats-body').innerHTML = html;
   const su = $('stats-signup'); if (su) su.onclick = () => { closeModal('m-stats'); openAuth('signup'); };
-  openModal('m-stats');
   startCountdown();
+}
+// Results from before perfect scoring need their puzzle to tell whether they were perfect.
+const triedDates = new Set();
+let resolving = null;
+function resolveOlderResults(){
+  if (resolving) return;
+  const dates = [...new Set(allResults().filter(r => r.perfect == null && r.cubes != null && !triedDates.has(r.date)).map(r => r.date))];
+  if (!dates.length) return;
+  dates.forEach(d => triedDates.add(d));
+  resolving = (async () => {
+    for (let i = 0; i < dates.length; i += 60) {
+      const url = SUPABASE_URL+'/rest/v1/daily_puzzles?select=date,difficulty,grid,name&date=in.('+dates.slice(i,i+60).join(',')+')';
+      const rows = await fetch(url,{headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+SUPABASE_ANON}}).then(r => r.ok ? r.json() : []).catch(() => []);
+      for (const row of Array.isArray(rows) ? rows : [])
+        if (row && Array.isArray(row.grid) && DIFFS.includes(row.difficulty) && /^\d{4}-\d{2}-\d{2}$/.test(row.date))
+          store.set('isometry-daily-'+row.date+'-'+row.difficulty, JSON.stringify({v:2, grid:row.grid, special:row.name||null}));
+    }
+  })().finally(() => { resolving = null; if (!$('m-stats').hidden) renderStats(); renderBar(); });
 }
 
 // ══════════════════════════════════════════
@@ -1570,7 +1734,7 @@ function renderArchive(){
     const r = loadResult(ds,arch.diff), pr = r ? null : loadProgress(ds,arch.diff);
     const rr = r ? resolvePerfect(r) : null;
     const cls = rr ? (rr.perfect ? 'perfect' : 'solved') : pr ? 'progress' : '';
-    const mark = rr ? (rr.perfect ? '💎' : '✓') : pr ? '•' : '';
+    const mark = rr ? (rr.perfect ? '💎' : '✓') : '';
     const label = fmtDate(ds,{weekday:'long',month:'long'})+', puzzle #'+puzzleNo(ds)+(rr ? (rr.perfect ? ', perfect' : ', solved') : pr ? ', in progress' : ', not played');
     html += '<button type="button" class="day '+cls+(ds === t ? ' today' : '')+'" data-date="'+ds+'" aria-label="'+label+'">'+d+'<i aria-hidden="true">'+mark+'</i></button>';
   }
@@ -1585,7 +1749,7 @@ $('classics-toggle').onclick = () => {
   $('classics-toggle').setAttribute('aria-expanded', String(open));
   $('classics-toggle').textContent = open ? 'Classic puzzles ▴' : 'Classic puzzles ▾';
   if (open) {
-    box.innerHTML = '<div class="classic-grid">' + DIFFS.map(d => CLASSICS[d].map((c,i) => '<button type="button" data-d="'+d+'" data-i="'+i+'">'+esc(c.name)+'<small>'+DIFF_LABEL[d]+(d === 'expert' ? ' · 4×4×4' : '')+'</small></button>').join('')).join('') + '</div>';
+    box.innerHTML = '<div class="classic-grid">' + DIFFS.map(d => CLASSICS[d].map((c,i) => '<button type="button" data-d="'+d+'" data-i="'+i+'">'+esc(c.name)+'<small>'+DIFF_LABEL[d]+'</small></button>').join('')).join('') + '</div>';
     box.querySelectorAll('button').forEach(b => b.onclick = () => { closeModal('m-archive'); openClassic(b.dataset.d, +b.dataset.i); });
   }
 };
@@ -1687,7 +1851,7 @@ $('menu-signout-btn').onclick = async () => { $('account-menu').hidden = true; i
 $('name-form').onsubmit = async e => {
   e.preventDefault(); const err = $('dn-error'); err.textContent = '';
   const name = $('dn-input').value.trim();
-  if (name.length < 3 || name.length > 20) { err.textContent = 'Must be 3–20 characters.'; return; }
+  if (name.length < 3 || name.length > 20) { err.textContent = 'Use 3 to 20 characters.'; return; }
   if (!window.ISOAuth) { err.textContent = authUnavailable(); return; }
   const r = await window.ISOAuth.saveDisplayName(name);
   if (r.error) { err.textContent = r.error; return; }
@@ -1695,7 +1859,7 @@ $('name-form').onsubmit = async e => {
 };
 
 // ══════════════════════════════════════════
-// COOKIE CONSENT (EEA, UK and Switzerland — detected from the time zone)
+// COOKIE CONSENT (EEA, UK and Switzerland, detected from the time zone)
 // ══════════════════════════════════════════
 function inConsentRegion(){
   let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch(e) {}
@@ -1730,7 +1894,6 @@ $('solved-share').onclick = shareResult;
 $('solved-results').onclick = openResults;
 $('solved-replay').onclick = playAgain;
 $('stats-btn').onclick = openStats;
-$('streak-btn').onclick = openStats;
 $('help-btn').onclick = openHowTo;
 $('live-switch').onclick = () => {
   liveOn = !liveOn; store.set('isometry-live', liveOn ? '1' : '0');
@@ -1751,6 +1914,8 @@ $('theme-btn').onclick = () => {
 // ══════════════════════════════════════════
 // BOOT
 // ══════════════════════════════════════════
+separateAccountData();
+setPlayer(storedUserId());
 renderHeader();
 openDaily('easy', todayET()).then(() => {
   // Warm the cache for the other difficulties
@@ -1760,18 +1925,21 @@ if (!store.get('isometry-htp-seen')) setTimeout(openHowTo, 600);
 if (!store.get('isometry-consent') && inConsentRegion()) $('consent').hidden = false;
 </script>
 
-<!-- AUTH MODULE — loads independently; the game works without it -->
+<!-- AUTH MODULE: loads on its own; the game works without it -->
 <script type="module">
 const SUPABASE_URL  = 'https://rzqfjaunlbbpradtgujl.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6cWZqYXVubGJicHJhZHRndWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwODk5ODQsImV4cCI6MjA5MTY2NTk4NH0.0CGs-iIKxyVHN2j2gWBJ7G45Dz-du6rIMqwbtBZMhvc';
 const STORAGE_KEY = 'sb-isometry-auth';
+const ISO = window.ISO;
+// A password-reset link arrives with the session in the URL fragment.
+const URL_SESSION = /[#&](access_token|error_description)=/.test(window.location.hash);
 
 let currentUser = null;
 let currentProfile = null;
 let sbReady = null;
+let syncing = null, syncingFor = null;
 
-// ── JWT DECODE (instant, no Supabase calls) ──
-// Restores the signed-in state on page load without waiting for the client library.
+// ── Saved session, read directly so the signed-in state shows before the library loads ──
 function decodeJWT(token){
   try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); } catch { return null; }
 }
@@ -1780,98 +1948,135 @@ function readStoredToken(){
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
     if (!parsed?.access_token || !parsed?.refresh_token) return null;
     const claims = decodeJWT(parsed.access_token);
-    if (!claims) return null;
-    return {parsed, claims, expired: claims.exp*1000 < Date.now()};
+    return claims?.sub ? {parsed, claims} : null;
   } catch { return null; }
 }
-const stored = readStoredToken();
 const changed = () => { if (typeof window.onAuthChange === 'function') window.onAuthChange(); };
 
-// ── LAZY SUPABASE CLIENT — loaded only when something needs the network ──
+// ── The client library loads only when something needs the network. It reads the
+// saved session itself and refreshes it once it has expired. ──
 function ensureSupabase(){
   if (sbReady) return sbReady;
   sbReady = (async () => {
     const {createClient} = await import('https://esm.sh/@supabase/supabase-js@2.39.3');
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {auth:{
       persistSession:true, storageKey:STORAGE_KEY, storage:window.localStorage,
-      autoRefreshToken:true, detectSessionInUrl:false, lock:async (_n,_t,fn) => await fn(),
+      autoRefreshToken:true, detectSessionInUrl:URL_SESSION, lock:async (_n,_t,fn) => await fn(),
     }});
-    if (stored) {
-      try { await sb.auth.setSession({access_token:stored.parsed.access_token, refresh_token:stored.parsed.refresh_token}); }
-      catch(e) { console.warn('setSession failed:', e.message); }
-    }
+    // The session can also end elsewhere, e.g. after a password change.
+    if (typeof sb.auth.onAuthStateChange === 'function')
+      sb.auth.onAuthStateChange(event => { if (event === 'SIGNED_OUT' && currentUser) signOutLocal(); });
     return sb;
   })();
   sbReady.catch(() => { sbReady = null; });
   return sbReady;
 }
 
-async function loadProfile(){
-  if (!currentUser) return;
+async function loadProfile(uid){
   try {
     const sb = await ensureSupabase();
-    const {data} = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-    if (data) {
+    const {data} = await sb.from('profiles').select('*').eq('id', uid).single();
+    if (data && currentUser?.id === uid) {
       currentProfile = data;
       changed();
-      if (typeof window.adoptServerStreak === 'function') window.adoptServerStreak(data.streak_count, data.streak_last_date);
+      ISO.setAccountStreak(uid, data.streak_count, data.streak_last_date, data.best_streak);
     }
   } catch(e) { console.warn('Profile load failed:', e.message); }
 }
 
 // Results go through submit_result(), which checks the build against the puzzle.
+// Returns 'ok', 'invalid' (the server will never accept it) or 'failed' (try again later).
 async function submitResult(r){
-  if (!currentUser || !r || !r.date) return;
+  const uid = currentUser?.id;
+  if (!uid || !r || !r.date) return 'failed';
   try {
     const sb = await ensureSupabase();
-    const {error} = await sb.rpc('submit_result', {
+    const {data,error} = await sb.rpc('submit_result', {
       p_date:r.date, p_difficulty:r.diff, p_grid:r.v === 2 ? r.grid : null, p_time_seconds:r.secs || 0,
       p_moves:r.moves || 0, p_hints:r.hints || 0, p_checks:r.checks || 0, p_assisted:r.v === 2 ? !!r.assisted : null,
       p_min_cubes:r.min ?? null, p_placed:r.cubes ?? null,
     });
-    if (error) console.warn('Save result failed:', error.message);
-  } catch(e) { console.warn('Save result failed:', e.message); }
+    if (error) {
+      console.warn('Save result failed:', error.message);
+      if (error.code !== '22023') return 'failed';
+      ISO.markSynced(uid, r.date, r.diff);
+      return 'invalid';
+    }
+    ISO.markSynced(uid, r.date, r.diff);
+    if (data && data.streak != null) ISO.setAccountStreak(uid, data.streak, data.streak_last_date, data.best_streak);
+    return 'ok';
+  } catch(e) { console.warn('Save result failed:', e.message); return 'failed'; }
 }
 
-async function uploadLocalResults(){
-  if (!currentUser) return;
-  const keys = Object.keys(localStorage).filter(k => /^isometry-result-\d{4}-\d{2}-\d{2}-(easy|medium|hard|expert)$/.test(k));
-  for (const key of keys) {
-    try {
-      const m = key.match(/^isometry-result-(\d{4}-\d{2}-\d{2})-(\w+)$/);
-      const r = JSON.parse(localStorage.getItem(key));
-      if (!r) continue;
-      if (r.v === 2) await submitResult(r);
-      else await submitResult({v:1, date:m[1], diff:m[2], secs:(r.time||'0:0').split(':').reduce((a,v) => a*60+(+v||0), 0), moves:r.moves, cubes:r.placed});
-    } catch(e) {}
+async function uploadPending(uid){
+  for (const r of ISO.pendingUploads(uid)) {
+    if (currentUser?.id !== uid || await submitResult(r) === 'failed') return;
   }
 }
 
-async function syncDown(){
-  if (!currentUser) return;
+// A streak kept while signed out carries over to the account (the server keeps the longer one).
+async function mergeGuestStreak(uid){
+  const g = ISO.guestStreak();
+  if (!g) return;
   try {
     const sb = await ensureSupabase();
-    const {data} = await sb.from('puzzle_results')
-      .select('date,difficulty,moves,time_seconds,time_display,placed,par,ratio,puzzle_name,is_daily,min_cubes,hints,checks,assisted,grid,version')
-      .eq('user_id', currentUser.id);
-    if (!data) return;
-    let added = 0;
-    for (const row of data) {
-      const key = 'isometry-result-'+row.date+'-'+row.difficulty;
-      if (localStorage.getItem(key)) continue;   // never overwrite local results
-      added++;
-      const v2 = row.version === 2 && row.grid;
-      localStorage.setItem(key, JSON.stringify(v2 ? {
-        v:2, date:row.date, diff:row.difficulty, cubes:row.placed, min:row.min_cubes, perfect:row.min_cubes != null && row.placed === row.min_cubes,
-        secs:row.time_seconds, time:row.time_display, hints:row.hints, checks:row.checks, assisted:row.assisted,
-        noAssists:row.assisted === false && row.hints === 0 && row.checks === 1, moves:row.moves, grid:row.grid,
-      } : {moves:row.moves, time:row.time_display, placed:row.placed, par:row.par, ratio:row.ratio, name:row.puzzle_name, diff:row.difficulty, isDaily:row.is_daily}));
-    }
-    if (added && typeof window.onResultsSynced === 'function') window.onResultsSynced();
+    const {data,error} = await sb.rpc('merge_guest_streak', {p_count:g.count, p_last_date:g.last, p_best:g.best});
+    if (error || currentUser?.id !== uid) return;
+    ISO.clearGuestStreak();
+    if (data) ISO.setAccountStreak(uid, data.streak, data.streak_last_date, data.best_streak);
+  } catch(e) { console.warn('Streak merge failed:', e.message); }
+}
+
+// Results saved on other devices.
+async function syncDown(uid){
+  try {
+    const sb = await ensureSupabase();
+    const {data,error} = await sb.from('puzzle_results')
+      .select('date,difficulty,moves,time_seconds,time_display,placed,min_cubes,hints,checks,assisted,grid,version')
+      .eq('user_id', uid);
+    if (error || !data || currentUser?.id !== uid) return;
+    if (ISO.applyServerRows(uid, data)) ISO.refresh();
   } catch(e) { console.warn('Sync down failed:', e.message); }
 }
 
-function afterSignIn(){ changed(); loadProfile(); uploadLocalResults().then(syncDown); }
+function syncAccount(){
+  const uid = currentUser?.id;
+  if (!uid) return Promise.resolve();
+  if (syncing && syncingFor === uid) return syncing;
+  syncingFor = uid;
+  const run = syncing = (async () => {
+    await mergeGuestStreak(uid);
+    await uploadPending(uid);
+    await loadProfile(uid);
+    await syncDown(uid);
+  })().finally(() => { if (syncing === run) syncing = null; });
+  return run;
+}
+
+function afterSignIn(){
+  changed();
+  ISO.accountReady(currentUser.id);
+  return syncAccount();
+}
+
+// Forget the account on this device: its session and its cached results.
+function signOutLocal(){
+  try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  currentUser = null; currentProfile = null;
+  ISO.signedOut();
+  changed();
+}
+
+// Check a saved session with the server, refreshing it if it has expired. Only a
+// definite "no" signs out: without a connection the account stays on this device.
+async function confirmSession(){
+  let res;
+  try { const sb = await ensureSupabase(); res = await sb.auth.getSession(); } catch(e) { return; }
+  if (!currentUser) return;
+  const session = res?.data?.session;
+  if (session?.user) { currentUser = session.user; afterSignIn(); }
+  else if (res?.error?.name !== 'AuthRetryableFetchError') signOutLocal();
+}
 
 window.ISOAuth = {
   user: () => currentUser,
@@ -1897,8 +2102,7 @@ window.ISOAuth = {
   },
   async signOut(){
     try { const sb = await ensureSupabase(); await sb.auth.signOut(); } catch(e) {}
-    localStorage.removeItem(STORAGE_KEY);
-    currentUser = null; currentProfile = null; changed();
+    signOutLocal();
   },
   async resetPassword(email){
     try {
@@ -1926,13 +2130,16 @@ window.ISOAuth = {
   },
 };
 
-// ── INSTANT SESSION RESTORE ──
-if (stored && !stored.expired) {
+// ── Restore a saved session straight away (even an expired one: it gets refreshed) ──
+const stored = readStoredToken();
+if (stored) {
   currentUser = {id:stored.claims.sub, email:stored.claims.email};
   changed();
-  const later = () => { setTimeout(loadProfile, 100); setTimeout(syncDown, 500); };
+  const later = () => setTimeout(confirmSession, 100);
   if (document.readyState === 'complete') later(); else window.addEventListener('load', later);
 }
+// Results solved offline upload once the connection is back.
+window.addEventListener('online', () => { if (currentUser) confirmSession(); });
 
 // ── PASSWORD RESET REDIRECT (#access_token=...&type=recovery) ──
 if (window.location.hash.includes('type=recovery')) {
@@ -1940,12 +2147,12 @@ if (window.location.hash.includes('type=recovery')) {
     try {
       const sb = await ensureSupabase();
       const {data} = await sb.auth.getSession();
-      if (data?.session) { currentUser = data.session.user; changed(); window.ISO && window.ISO.openModal('m-reset'); }
+      if (data?.session) { currentUser = data.session.user; afterSignIn(); ISO.openModal('m-reset'); }
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch(e) { console.warn('Reset redirect failed:', e.message); }
   })();
-} else if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
-  // OAuth redirect
+} else if (URL_SESSION || window.location.search.includes('code=')) {
+  // Other sign-in links (OAuth, email confirmation)
   (async () => {
     try {
       const sb = await ensureSupabase();
@@ -1955,7 +2162,7 @@ if (window.location.hash.includes('type=recovery')) {
         if (!currentProfile?.display_name) setTimeout(() => window.openNameModal && window.openNameModal(), 800);
       }
       window.history.replaceState({}, document.title, window.location.pathname);
-    } catch(e) { console.warn('OAuth redirect handling failed:', e.message); }
+    } catch(e) { console.warn('Sign-in redirect failed:', e.message); }
   })();
 }
 </script>
